@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Typst language support for CodeMirror editor",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:wasm": "wasm-pack -v build --release --no-pack --target=bundler --out-dir=\"$INIT_CWD\"/wasm typst/crates/typst-syntax && rm -f wasm/.gitignore"
   },
   "repository": {
     "type": "git",
@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/kxxt/codemirror-lang-typst/issues"
   },
-  "homepage": "https://github.com/kxxt/codemirror-lang-typst#readme"
+  "homepage": "https://github.com/kxxt/codemirror-lang-typst#readme",
+  "devDependencies": {
+    "wasm-pack": "^0.13.1"
+  }
 }
