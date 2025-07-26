@@ -8,7 +8,6 @@ import {
     defineLanguageFacet,
 } from '@codemirror/language'
 import { typstHighlight, typstTags } from './highlight'
-import type { Extension } from '@codemirror/state'
 
 const data = defineLanguageFacet({ commentTokens: { block: { open: "/*", close: "*/" } } })
 
@@ -45,11 +44,12 @@ export const TypstHighlightSytle = HighlightStyle.define([
     { tag: tags.monospace, fontFamily: "monospace", },
 ])
 
-export function typst(): [LanguageSupport, Extension] {
+export function typst(): LanguageSupport {
     let parser = new TypstParser(typstHighlight);
     let updateListener = parser.updateListener();
-    return [new LanguageSupport(new Language(data, parser,
+    return new LanguageSupport(new Language(data, parser,
         [
+            updateListener,
             syntaxHighlighting(TypstHighlightSytle)
-        ], 'typst')), updateListener]
+        ], 'typst'))
 }
