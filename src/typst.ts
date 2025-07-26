@@ -2,7 +2,7 @@ import {
     Tree, NodeType, TreeFragment, NodeSet, Parser, NodePropSource, Input, PartialParse
 } from "@lezer/common"
 import { TypstWasmParser } from "../wasm/typst_syntax"
-import { ViewPlugin, ViewUpdate } from "@codemirror/view"
+import { StateField } from "@codemirror/state"
 
 export class TypstParseContext implements PartialParse {
     private parsed: number
@@ -80,22 +80,23 @@ export class TypstParser extends Parser {
     // Get an update listener for syncing typst parser state with the document
     updateListener() {
         let parser = this;
-        return ViewPlugin.fromClass(class {
-            constructor(view) { }
-
-            update(update: ViewUpdate) {
-                if (!update.docChanged) return;
-                update.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
-                    let edits = parser.parser?.edit(fromA, toA, inserted.toString())
-                    if (edits.full_update) {
-                        parser.clear_tree()
-                    } else {
-                        // Apply incremental edits
-                        for (const edit of edits.edits) {
-                            parser.apply_tree_edit(edit)
+        return StateField.define({
+            create() { return null; },
+            update(value, transaction) {
+                if (transaction.docChanged) {
+                    transaction.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
+                        let edits = parser.parser?.edit(fromA, toA, inserted.toString())
+                        if (edits.full_update) {
+                            parser.clear_tree()
+                        } else {
+                            // Apply incremental edits
+                            for (const edit of edits.edits) {
+                                parser.apply_tree_edit(edit)
+                            }
                         }
-                    }
-                })
+                    })
+                }
+                return null;
             }
         })
     }
