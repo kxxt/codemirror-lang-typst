@@ -1,0 +1,22 @@
+{
+  "name": "codemirror-lang-typst",
+  "version": "0.1.0",
+  "description": "Typst language support for CodeMirror editor",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kxxt/codemirror-lang-typst.git"
+  },
+  "keywords": [
+    "typst",
+    "codemirror"
+  ],
+  "author": "Levi Zim <rsworktech@outlook.com> (kxxt)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/kxxt/codemirror-lang-typst/issues"
+  },
+  "homepage": "https://github.com/kxxt/codemirror-lang-typst#readme"
+}
