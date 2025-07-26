@@ -1,7 +1,7 @@
 import {
     Tree, NodeType, TreeFragment, NodeSet, Parser, NodePropSource, Input, PartialParse
 } from "@lezer/common"
-import { TypstWasmParser } from "../wasm/typst_syntax"
+import { TypstWasmParser } from "../wasm/typst_syntax.js"
 import { StateField } from "@codemirror/state"
 
 export class TypstParseContext implements PartialParse {
