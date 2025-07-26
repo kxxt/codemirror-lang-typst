@@ -1,0 +1,4 @@
+[submodule "typst"]
+	path = typst
+	url = https://github.com/kxxt/typst/
+	branch = cm-lang-typst
