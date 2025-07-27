@@ -1,4 +1,4 @@
-import { styleTags, tags, Tag } from "@lezer/highlight"
+import { styleTags, tags } from "@lezer/highlight"
 
 export const typstHighlight = styleTags({
   "Shebang": tags.documentMeta,
@@ -6,7 +6,7 @@ export const typstHighlight = styleTags({
 
   "Text": tags.content,
   // "Space": typstTags["Space"],
-  "LineBreak": tags.contentSeparator,
+  "Linebreak": tags.contentSeparator,
   // "ParBreak": typstTags["ParBreak"],
   "Escape": tags.escape,
   "Shorthand": tags.contentSeparator,
@@ -19,8 +19,7 @@ export const typstHighlight = styleTags({
   // RawTrimmed
   "Link": tags.link,
   "Label": tags.labelName,
-  "Ref": tags.labelName,
-  // "RefMarker": typstTags["RefMarker"],
+  "Ref/...": tags.labelName,
   "Heading/...": tags.heading,
   // HeadingMarker
   // "ListItem/...": tags.list,
@@ -34,13 +33,9 @@ export const typstHighlight = styleTags({
   // "Math": typstTags["Math"],
   "MathText": tags.special(tags.string),
   "MathIdent": tags.special(tags.variableName),
-  "MathShorthand": tags.contentSeparator,
-  "MathAlignPoint": tags.contentSeparator,
-  "MathDelimited": tags.contentSeparator,
-  "MathAttach": tags.contentSeparator,
-  "MathPrimes": tags.contentSeparator,
-  "MathFrac": tags.contentSeparator,
-  "MathRoot": tags.contentSeparator,
+  "MathShorthand MathAlignPoint MathDelimited MathAttach MathPrimes MathFrac MathRoot": tags.special(tags.contentSeparator),
+
+  "Error": tags.invalid,
 
   "Hash": tags.controlKeyword,
   "LeftBrace RightBrace": tags.brace,
@@ -58,7 +53,7 @@ export const typstHighlight = styleTags({
   "Arrow": tags.controlOperator,
   "Root": tags.arithmeticOperator,
 
-  "Not And Or": tags.bitwiseOperator,
+  "Not And Or": tags.operatorKeyword,
   "None Auto": tags.literal,
   "If Else For While Break Continue Return": tags.controlKeyword,
   "Import Include": tags.moduleKeyword,
@@ -66,7 +61,7 @@ export const typstHighlight = styleTags({
   "As In": tags.operatorKeyword,
 
   "Code": tags.monospace,
-  "Ident": tags.name,
+  "Ident": tags.variableName,
   "Bool": tags.bool,
   "Int": tags.integer,
   "Float": tags.float,
