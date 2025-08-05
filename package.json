@@ -1,6 +1,6 @@
 {
   "name": "codemirror-lang-typst",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Typst language support for CodeMirror editor",
   "scripts": {
     "build:wasm": "wasm-pack -v build --release --no-pack --target=bundler --out-dir=\"$INIT_CWD\"/wasm typst/crates/typst-syntax && rm -f wasm/.gitignore",
