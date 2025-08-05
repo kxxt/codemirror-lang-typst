@@ -3,6 +3,7 @@ import {
 } from "@lezer/common"
 import { TypstWasmParser } from "../wasm/typst_syntax.js"
 import { StateField } from "@codemirror/state"
+import { language } from "@codemirror/language"
 
 export class TypstParseContext implements PartialParse {
     private parsed: number
@@ -77,12 +78,16 @@ export class TypstParser extends Parser {
         this.nodeSet = new NodeSet(node_types).extend(highlighting)
     }
 
-    // Get an update listener for syncing typst parser state with the document
+    /// Get an update listener for syncing typst parser state with the document
     updateListener() {
         let parser = this;
         return StateField.define({
             create() { return null; },
             update(value, transaction) {
+                if (transaction.startState.facet(language) != transaction.state.facet(language)) {
+                    parser.clearParser()
+                    return null;
+                }
                 if (transaction.docChanged) {
                     transaction.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
                         let edits = parser.parser?.edit(fromA, toA, inserted.toString())
@@ -110,6 +115,14 @@ export class TypstParser extends Parser {
 
     clearTree() {
         this.last_tree = null
+    }
+
+    /// Clears all internal parser state,
+    /// This should be called when the editor state is being replaced, which won't cause
+    /// a document change event and will cause the parse lose sync with the editor.
+    clearParser() {
+        this.parser = null
+        this.clearTree()
     }
 
     applyTreeEdit(edit: Edit) {
