@@ -87,11 +87,11 @@ export class TypstParser extends Parser {
                     transaction.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
                         let edits = parser.parser?.edit(fromA, toA, inserted.toString())
                         if (edits.full_update) {
-                            parser.clear_tree()
+                            parser.clearTree()
                         } else {
                             // Apply incremental edits
                             for (const edit of edits.edits) {
-                                parser.apply_tree_edit(edit)
+                                parser.applyTreeEdit(edit)
                             }
                         }
                     })
@@ -108,11 +108,11 @@ export class TypstParser extends Parser {
         return parse
     }
 
-    clear_tree() {
+    clearTree() {
         this.last_tree = null
     }
 
-    apply_tree_edit(edit: Edit) {
+    applyTreeEdit(edit: Edit) {
         let parent: Mutable<Tree>;
         let positions: number[];
         switch (edit.kind) {
