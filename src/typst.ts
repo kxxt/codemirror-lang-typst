@@ -103,7 +103,9 @@ export class TypstParser extends Parser {
                         // Adjust coordinates into post-previous-edits coordinate space
                         const adjFrom = fromA + cumulativeOffset;
                         const adjTo = toA + cumulativeOffset;
+                        console.log(fromA, toA, fromB, toB, inserted)
                         let edits = parser.parser?.edit(adjFrom, adjTo, inserted.toString())
+                        console.log(edits)
                         if (edits.full_update) {
                             parser.clearTree()
                         } else {
@@ -117,6 +119,7 @@ export class TypstParser extends Parser {
                         cumulativeOffset += (newLength - oldLength);
                     })
                 }
+                console.log(parser.tree())
                 return null;
             }
         })
