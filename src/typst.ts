@@ -89,8 +89,21 @@ export class TypstParser extends Parser {
                     return null;
                 }
                 if (transaction.docChanged) {
+                    // We begin with a document [0, len]
+                    // Then the first change come in that replaces [a, b] with a string of length L
+                    // In the same transaction, there is another change that replaces [c, d] with a string of length N
+                    // Now we need to calculate [c', d'] in the document after applied the first change
+                    let cumulativeOffset = 0;
                     transaction.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
-                        let edits = parser.parser?.edit(fromA, toA, inserted.toString())
+                        // The fromA toA are always based on the original document,
+                        // that is, we cannot treat multiple changes in this transaction
+                        // as stacked changes directly.
+                        // We need to manually calculate the (from, to) range for the next
+                        // change after applying the previous change.
+                        // Adjust coordinates into post-previous-edits coordinate space
+                        const adjFrom = fromA + cumulativeOffset;
+                        const adjTo = toA + cumulativeOffset;
+                        let edits = parser.parser?.edit(adjFrom, adjTo, inserted.toString())
                         if (edits.full_update) {
                             parser.clearTree()
                         } else {
@@ -99,6 +112,9 @@ export class TypstParser extends Parser {
                                 parser.applyTreeEdit(edit)
                             }
                         }
+                        const oldLength = toA - fromA;
+                        const newLength = inserted.length;
+                        cumulativeOffset += (newLength - oldLength);
                     })
                 }
                 return null;
