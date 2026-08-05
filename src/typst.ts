@@ -1,191 +1,194 @@
 import {
-    Tree, NodeType, TreeFragment, NodeSet, Parser, NodePropSource, Input, PartialParse
+    Input, NodePropSource, NodeSet, NodeType, Parser, PartialParse, Tree,
+    TreeFragment,
 } from "@lezer/common"
-import { TypstWasmParser } from "../wasm/typst_syntax.js"
-import { StateField } from "@codemirror/state"
-import { language } from "@codemirror/language"
+import {highlightingFor} from "@codemirror/language"
+import {Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate} from "@codemirror/view"
+import {TypstWasmParser} from "../wasm/typst_syntax.js"
+import {typstHighlightTag} from "./highlight"
 
 export class TypstParseContext implements PartialParse {
-    private parsed: number
     stoppedAt: number | null = null
 
-    /// @internal
     constructor(
-        readonly parser: TypstParser,
-        /// @internal
         readonly input: Input,
-        fragments: readonly TreeFragment[],
-        /// @internal
-        readonly ranges: readonly { from: number, to: number }[],
-    ) {
-        this.parsed = 0;
-    }
+        readonly tree: Tree,
+    ) {}
 
     get parsedPos() {
-        return this.parsed
+        return this.input.length
     }
 
     advance() {
-        return this.parser.tree()
+        return this.tree
     }
 
-    stopAt(pos: number) {
-        if (this.stoppedAt != null && this.stoppedAt < pos) throw new RangeError("Can't move stoppedAt forward")
-        this.stoppedAt = pos
-    }
+    // This parser has no syntax work to defer, so returning the complete
+    // placeholder tree is cheaper than splitting it into partial parses.
+    stopAt(_pos: number) {}
 }
 
-type Edit = ChildrenSplice | UpdateParent
+/**
+ * A lightweight placeholder parser used only to register Typst as a
+ * CodeMirror language. Syntax highlighting is provided separately by the
+ * incremental Typst WASM highlighter below.
+ */
+export class TypstParser extends Parser {
+    readonly nodeSet: NodeSet
 
-type ChildrenSplice = {
-    kind: 'ChildrenSplice'
-    prefix: [number],
+    constructor(...props: NodePropSource[]) {
+        super()
+        const top = NodeType.define({name: "Typst", id: 0, top: true})
+        this.nodeSet = new NodeSet([top]).extend(...props)
+    }
+
+    createParse(
+        input: Input,
+        _fragments: readonly TreeFragment[],
+        _ranges: readonly {from: number, to: number}[],
+    ): PartialParse {
+        return new TypstParseContext(
+            input,
+            new Tree(this.nodeSet.types[0], [], [], input.length),
+        )
+    }
+
+    /** @deprecated Parser synchronization is no longer necessary. */
+    updateListener() {
+        return []
+    }
+
+    /** @deprecated The placeholder parser has no mutable parser state. */
+    clearParser() {}
+
+    /** @deprecated The placeholder parser has no mutable syntax tree. */
+    clearTree() {}
+}
+
+type TextEdit = {
     from: number,
     to: number,
-    replacement: [any]
+    insert: string,
 }
 
-type UpdateParent = {
-    kind: 'UpdateParent'
-    prefix: [number],
-    prev: number,
-    new: number,
-}
+const highlightTags = (TypstWasmParser.get_highlight_tags() as string[])
+    .map(name => typstHighlightTag[name])
 
-type Mutable<T> = { -readonly [P in keyof T]: T[P] }
+const markCache = new Map<string, Decoration>()
 
-export class TypstParser extends Parser {
-    /// @internal
-    parser: TypstWasmParser | null
-    nodeSet: NodeSet
-    last_tree: Tree | null
+class TypstHighlighter {
+    parser: TypstWasmParser
+    highlights: Uint32Array
+    decorations: DecorationSet
 
-    /// @internal
-    constructor(
-        highlighting: NodePropSource,
-    ) {
-        super()
-        this.parser = null
-        this.last_tree = null
-        const syntax_types = TypstWasmParser.get_node_types()
-        const node_types = [NodeType.none]
-        for (const [ty_name, ty_id] of syntax_types) {
-            node_types.push(NodeType.define({
-                name: ty_name,
-                id: ty_id
-            }))
-        }
-        this.nodeSet = new NodeSet(node_types).extend(highlighting)
+    constructor(readonly view: EditorView) {
+        this.parser = new TypstWasmParser(view.state.doc.toString())
+        this.highlights = this.parser.highlight()
+        this.decorations = createDecorations(view, this.highlights)
     }
 
-    /// Get an update listener for syncing typst parser state with the document
-    updateListener() {
-        let parser = this;
-        return StateField.define({
-            create() { return null; },
-            update(value, transaction) {
-                if (transaction.startState.facet(language) != transaction.state.facet(language)) {
-                    parser.clearParser()
-                    return null;
+    update(update: ViewUpdate) {
+        if (update.docChanged) {
+            const edits: TextEdit[] = []
+            update.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
+                edits.push({from: fromA, to: toA, insert: inserted.toString()})
+            })
+
+            try {
+                const ranges = this.parser.edit_many(edits)
+                if (this.parser.length() != update.state.doc.length) {
+                    throw new RangeError("Typst parser document length is out of sync")
                 }
-                if (transaction.docChanged) {
-                    transaction.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
-                        let edits = parser.parser?.edit(fromA, toA, inserted.toString())
-                        if (edits.full_update) {
-                            parser.clearTree()
-                        } else {
-                            // Apply incremental edits
-                            for (const edit of edits.edits) {
-                                parser.applyTreeEdit(edit)
-                            }
-                        }
-                    })
-                }
-                return null;
+                this.highlights = patchHighlights(this.highlights, update.changes, ranges, this.parser)
+            } catch (_) {
+                // A fresh parser is a safe fallback if an incremental update
+                // cannot be applied. This does not affect the editor update.
+                const previous = this.parser
+                this.parser = new TypstWasmParser(update.state.doc.toString())
+                this.highlights = this.parser.highlight()
+                previous.free()
             }
-        })
-    }
+        }
 
-    createParse(input: Input, fragments: readonly TreeFragment[], ranges: readonly { from: number, to: number }[]): PartialParse {
-        if (this.parser == null)
-            this.parser = new TypstWasmParser(input.read(0, input.length))
-        let parse: PartialParse = new TypstParseContext(this, input, fragments, ranges)
-        return parse
-    }
-
-    clearTree() {
-        this.last_tree = null
-    }
-
-    /// Clears all internal parser state,
-    /// This should be called when the editor state is being replaced, which won't cause
-    /// a document change event and will cause the parse lose sync with the editor.
-    clearParser() {
-        this.parser = null
-        this.clearTree()
-    }
-
-    applyTreeEdit(edit: Edit) {
-        let parent: Mutable<Tree>;
-        let positions: number[];
-        switch (edit.kind) {
-            case "ChildrenSplice":
-                parent = locateSubTree(this.last_tree!, edit.prefix);
-                for (const newChild of edit.replacement) {
-                    mountPrototypes(this.nodeSet, newChild)
-                }
-                // calculate new length
-                let superseded_length = parent.children.slice(edit.from, edit.to).reduce((acc: any, v: any) => acc + v.length, 0);
-                let replacement_length = edit.replacement.reduce((acc: any, v: any) => acc + v.length, 0);
-                (parent.children as Tree[]).splice(edit.from, edit.to - edit.from, ...edit.replacement);
-                positions = parent.positions as number[];
-                positions.splice(edit.from, edit.to - edit.from, ...new Array(edit.replacement.length).fill(0))
-                parent.length += replacement_length - superseded_length
-                let len_acc = (parent.positions[edit.from - 1] ?? 0) + (parent.children[edit.from - 1]?.length ?? 0)
-                for (let i = edit.from; i < parent.positions.length; i++) {
-                    positions[i] = len_acc;
-                    len_acc += parent.children[i].length
-                }
-                break;
-            case "UpdateParent":
-                let i = edit.prefix.pop()!;
-                parent = locateSubTree(this.last_tree!, edit.prefix);
-                const delta = edit.new - edit.prev
-                parent.length += delta
-                positions = parent.positions as number[];
-                for (let j = i + 1; j < parent.positions.length; j++) {
-                    positions[j] += delta
-                }
-                break;
+        if (update.docChanged || update.transactions.some(transaction => transaction.reconfigured)) {
+            this.decorations = createDecorations(update.view, this.highlights)
         }
     }
 
-    tree(): Tree | null {
-        if (this.last_tree)
-            return this.last_tree
-        let parsed = this.parser?.tree();
-        if (parsed == null)
-            return null;
-        this.last_tree = mountPrototypes(this.nodeSet, parsed);
-        return this.last_tree
+    destroy() {
+        this.parser.free()
     }
 }
 
-function locateSubTree(tree: Tree, prefix: number[]): Tree {
-    let curr = tree
-    for (const i of prefix) {
-        curr = curr.children[i] as Tree
+/**
+ * Update a highlight buffer (UTF-16 `(from, to, tag)` triples) after a
+ * document change, without re-highlighting the whole document.
+ *
+ * The ranges the incremental parser had to reparse (`ranges`) are removed from
+ * the buffer and recomputed via [`TypstWasmParser.highlight_range`]; all other
+ * highlights are reused, only their positions are mapped through the change.
+ */
+export function patchHighlights(
+    highlights: Uint32Array,
+    changes: {mapPos(pos: number, assoc?: number): number},
+    ranges: Uint32Array,
+    parser: TypstWasmParser,
+): Uint32Array {
+    // Map the previous highlights through the change, dropping ranges that
+    // were fully deleted.
+    const kept = []
+    for (let i = 0; i < highlights.length; i += 3) {
+        const from = changes.mapPos(highlights[i], 1)
+        const to = changes.mapPos(highlights[i + 1], -1)
+        if (from < to) kept.push(from, to, highlights[i + 2])
     }
-    return curr
+
+    // Keep only the highlights that are not affected by a reparsed range.
+    const filtered = []
+    outer: for (let i = 0; i < kept.length; i += 3) {
+        for (let r = 0; r < ranges.length; r += 2) {
+            if (kept[i] < ranges[r + 1] && ranges[r] < kept[i + 1]) continue outer
+        }
+        filtered.push(kept[i], kept[i + 1], kept[i + 2])
+    }
+
+    // Recompute the highlights for the reparsed ranges.
+    const fresh = []
+    for (let r = 0; r < ranges.length; r += 2) {
+        const triples = parser.highlight_range(ranges[r], ranges[r + 1])
+        for (let i = 0; i < triples.length; i += 3) {
+            fresh.push(triples[i], triples[i + 1], triples[i + 2])
+        }
+    }
+
+    // `Decoration.set` sorts the ranges, so no explicit ordering is needed.
+    return Uint32Array.from(filtered.concat(fresh))
 }
 
-// Recursively mount prototypes onto the parsed tree
-function mountPrototypes(nodeSet: NodeSet, tree: any): Tree {
-    Object.setPrototypeOf(tree, Tree.prototype)
-    tree.type = nodeSet.types[tree.kind]
-    for (const child of tree.children) {
-        mountPrototypes(nodeSet, child)
+function createDecorations(view: EditorView, highlights: Uint32Array): DecorationSet {
+    const ranges = []
+    const documentLength = view.state.doc.length
+
+    for (let i = 0; i < highlights.length; i += 3) {
+        const from = Math.min(highlights[i], documentLength)
+        const to = Math.min(highlights[i + 1], documentLength)
+        const tag = highlightTags[highlights[i + 2]]
+        if (!tag || from >= to) continue
+
+        const className = highlightingFor(view.state, [tag])
+        if (!className) continue
+        let mark = markCache.get(className)
+        if (!mark) markCache.set(className, mark = Decoration.mark({class: className}))
+        ranges.push(mark.range(from, to))
     }
-    return tree
+
+    return Decoration.set(ranges, true)
 }
 
+/**
+ * Incremental Typst syntax highlighting implemented as CodeMirror
+ * decorations, without exposing the Typst syntax tree as a Lezer tree.
+ */
+export const typstHighlighting = ViewPlugin.fromClass(TypstHighlighter, {
+    decorations: value => value.decorations,
+})

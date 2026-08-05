@@ -6,6 +6,7 @@
     "build:wasm": "wasm-pack -v build --release --no-pack --target=bundler --out-dir=\"$INIT_CWD\"/wasm typst/crates/typst-syntax && rm -f wasm/.gitignore",
     "build:codemirror": "cm-buildhelper src/index.ts",
     "build": "npm run build:wasm && npm run build:codemirror",
+    "test": "npm run build && NODE_OPTIONS=\"--experimental-wasm-modules\" cm-runtests",
     "prepare": "npm run build"
   },
   "type": "module",
