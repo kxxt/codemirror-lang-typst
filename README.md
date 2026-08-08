@@ -32,3 +32,20 @@ const extensions = [typst_lezer()]
 
 The standalone parser is also exported from the `/lezer` entry as
 `typstParser` and as the conventional `parser` alias.
+
+`typst_lezer()` also registers CodeMirror autocomplete data for Typst 0.15's
+built-in functions, types, modules, constants, and math symbols. Add
+CodeMirror's `autocompletion()` extension to your editor to display them:
+
+```js
+import {autocompletion} from "@codemirror/autocomplete"
+import {typst_lezer} from "codemirror-lang-typst/lezer"
+
+const extensions = [typst_lezer(), autocompletion()]
+```
+
+Completions understand built-in field access, including symbol modifiers such
+as `arrow.r`, nested modifiers such as `arrow.r.long`, and namespaces such as
+`sym.arrow`, `math.sqrt`, `calc.sin`, and `sys.version`.
+
+Autocomplete is intentionally not registered by the legacy `typst()` support.

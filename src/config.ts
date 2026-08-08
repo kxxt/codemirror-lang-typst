@@ -2,9 +2,11 @@ import {HighlightStyle, defineLanguageFacet} from "@codemirror/language"
 import {tags} from "@lezer/highlight"
 import {typstTags} from "./highlight"
 
-export const typstLanguageData = defineLanguageFacet({
+export const typstLanguageDataConfig = {
     commentTokens: {line: "//", block: {open: "/*", close: "*/"}},
-})
+} as const
+
+export const typstLanguageData = defineLanguageFacet(typstLanguageDataConfig)
 
 // The same highlight style as the official Typst web app
 // (https://typst.app), using the app's light theme colors.

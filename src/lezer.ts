@@ -2,13 +2,21 @@ import {
     Language,
     LanguageSupport,
     defaultHighlightStyle,
+    defineLanguageFacet,
     languageDataProp,
     syntaxHighlighting,
 } from "@codemirror/language"
 import {styleTags, tags} from "@lezer/highlight"
-import {TypstHighlightSytle, typstLanguageData} from "./config"
+import {TypstHighlightSytle, typstLanguageDataConfig} from "./config"
+import {typstCompletionSource} from "./complete"
 import {typstTags} from "./highlight"
 import {TypstLezerParser} from "./parser"
+
+/** Language data used by the Lezer implementation, including completions. */
+export const typstLezerLanguageData = defineLanguageFacet({
+    ...typstLanguageDataConfig,
+    autocomplete: typstCompletionSource,
+})
 
 /**
  * Lezer highlight metadata for the Typst concrete syntax tree.
@@ -57,15 +65,17 @@ export const typstLezerHighlighting = styleTags({
  */
 export function typst_lezer(): LanguageSupport {
     const parser = new TypstLezerParser(
-        languageDataProp.add(type => type.isTop ? typstLanguageData : undefined),
+        languageDataProp.add(type => type.isTop ? typstLezerLanguageData : undefined),
         typstLezerHighlighting,
     )
-    return new LanguageSupport(new Language(typstLanguageData, parser, [], "typst"), [
+    return new LanguageSupport(new Language(typstLezerLanguageData, parser, [], "typst"), [
         syntaxHighlighting(TypstHighlightSytle),
         syntaxHighlighting(defaultHighlightStyle),
     ])
 }
 
-export {TypstHighlightSytle, typstLanguageData} from "./config"
+export {typstLezerLanguageData as typstLanguageData}
+export {TypstHighlightSytle} from "./config"
+export * from "./complete"
 export * from "./highlight"
 export * from "./parser"

@@ -161,5 +161,6 @@ describe("Typst incremental highlighting", () => {
         ist(tree.type.name, "Typst")
         ist(tree.length, doc.length)
         ist(tree.children.length, 0)
+        ist(editorState.languageDataAt("autocomplete", 1).length, 0)
     })
 })
