@@ -60,4 +60,11 @@ named and closure-valued functions, function parameters, destructuring
 bindings, and `for` loop bindings. Local definitions shadow built-ins and are
 only suggested where they are visible.
 
+The native Lezer support also provides automatic indentation for code and
+content blocks, multiline calls and collections, function parameters, math
+arguments, and nested list content. Closing delimiters dedent automatically.
+Enter splits list content at the cursor into a sibling item with the appropriate
+marker (or creates an empty sibling at the end). Shift-Enter instead starts an
+indented continuation line without a marker.
+
 Autocomplete is intentionally not registered by the legacy `typst()` support.

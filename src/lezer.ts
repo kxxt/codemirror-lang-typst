@@ -10,12 +10,15 @@ import {styleTags, tags} from "@lezer/highlight"
 import {TypstHighlightSytle, typstLanguageDataConfig} from "./config"
 import {typstCompletionSource} from "./complete"
 import {typstTags} from "./highlight"
+import {typstLezerIndentation, typstLezerIndentService} from "./indent"
+import {typstLezerListKeymap} from "./list"
 import {TypstLezerParser} from "./parser"
 
 /** Language data used by the Lezer implementation, including completions. */
 export const typstLezerLanguageData = defineLanguageFacet({
     ...typstLanguageDataConfig,
     autocomplete: typstCompletionSource,
+    indentOnInput: /^\s*(?:[)\]}⟩⌉⌋❩❫❭❯❱❳⟧⟭⦄⦆⦈⦊⦌⦎⦐⦒⦘]|\|])$/,
 })
 
 /**
@@ -59,6 +62,7 @@ export const typstLezerHighlighting = styleTags({
 
 /**
  * Typst language support backed entirely by the native Lezer parser.
+ * Includes syntax highlighting, autocomplete, and automatic indentation.
  *
  * Import this from `codemirror-lang-typst/lezer` when the application should
  * not load or bundle the Typst WASM parser.
@@ -67,10 +71,13 @@ export function typst_lezer(): LanguageSupport {
     const parser = new TypstLezerParser(
         languageDataProp.add(type => type.isTop ? typstLezerLanguageData : undefined),
         typstLezerHighlighting,
+        typstLezerIndentation,
     )
     return new LanguageSupport(new Language(typstLezerLanguageData, parser, [], "typst"), [
         syntaxHighlighting(TypstHighlightSytle),
         syntaxHighlighting(defaultHighlightStyle),
+        typstLezerIndentService,
+        typstLezerListKeymap,
     ])
 }
 
@@ -78,5 +85,7 @@ export {typstLezerLanguageData as typstLanguageData}
 export {TypstHighlightSytle} from "./config"
 export * from "./complete"
 export * from "./highlight"
+export * from "./indent"
+export * from "./list"
 export * from "./parser"
 export type {TypstBuiltinParameter} from "./signatures"
