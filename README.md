@@ -72,3 +72,14 @@ collections, math delimiters, raw blocks, block comments, nested list bodies,
 and heading sections.
 
 Autocomplete is intentionally not registered by the legacy `typst()` support.
+
+## Publishing
+
+The `publish.yml` GitHub Actions workflow publishes a release through npm
+trusted publishing when a `v<package-version>` tag is pushed. Prereleases use
+their prerelease identifier as the npm dist-tag (for example, `alpha`), while
+stable versions use `latest`.
+
+Configure the npm trusted publisher for the `kxxt/codemirror-lang-typst`
+repository with the workflow filename `publish.yml` and allow `npm publish`.
+The workflow uses GitHub OIDC and does not require an `NPM_TOKEN` secret.
