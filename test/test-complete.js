@@ -142,6 +142,67 @@ describe("Typst Lezer autocomplete", () => {
         ist(typstBuiltinSignatures["calc.sin"][0][0], "angle")
     })
 
+    it("completes preceding local variables and functions", async () => {
+        const variable = await complete("#let local-value = 1\n#local-")
+        ist(option(variable, "local-value").type, "variable")
+        ist(option(variable, "local-value").detail, "Local variable")
+
+        const fn = await complete("#let greet(name) = [Hi #name]\n#gre")
+        ist(option(fn, "greet").type, "function")
+        ist(option(fn, "greet").detail, "Local function (name)")
+        ist(option(fn, "greet").commitCharacters[0], "(")
+
+        const closure = await complete("#let mapper = (value) => value\n#map")
+        ist(option(closure, "mapper").type, "function")
+
+        const mathDoc = "#let radius = 2\n$rad$"
+        const math = await complete(mathDoc, mathDoc.lastIndexOf("rad") + 3)
+        ist(option(math, "radius").type, "variable")
+    })
+
+    it("completes closure parameters and destructured bindings", async () => {
+        const doc = "#let f((first, key: renamed), named: 1, ..rest) = [#ren]"
+        const result = await complete(doc, doc.lastIndexOf("ren") + 3)
+        for (const name of ["first", "renamed", "named", "rest"]) {
+            ist(option(result, name).type, "variable")
+        }
+        ist(option(result, "key"), undefined)
+        ist(option(result, "f").type, "function")
+    })
+
+    it("limits loop bindings to the loop body", async () => {
+        const bodyDoc = "#for (item, index) in values { ite }"
+        const body = await complete(bodyDoc, bodyDoc.lastIndexOf("ite") + 3)
+        ist(option(body, "item").type, "variable")
+        ist(option(body, "index").type, "variable")
+
+        const iterableDoc = "#for item in ite [#item]"
+        const iterable = await complete(iterableDoc, iterableDoc.indexOf("ite ") + 3)
+        ist(option(iterable, "item"), undefined)
+    })
+
+    it("respects declaration order, nested scopes, and shadowing", async () => {
+        const futureDoc = "#fut\n#let future = 1"
+        ist(option(await complete(futureDoc, 4), "future"), undefined)
+
+        const hiddenDoc = "#{ { let hidden = 1; hidden }; hid }"
+        const hidden = await complete(hiddenDoc, hiddenDoc.lastIndexOf("hid") + 3)
+        ist(option(hidden, "hidden"), undefined)
+
+        const shadowDoc = "#let choice(value) = value\n#{ let choice = 1; cho }"
+        const shadow = await complete(shadowDoc, shadowDoc.lastIndexOf("cho") + 3)
+        ist(option(shadow, "choice").type, "variable")
+    })
+
+    it("offers locals inside built-in parameter values", async () => {
+        const result = await complete("#let brand-color = red\n#strike(stroke: brand-")
+        ist(option(result, "brand-color").type, "variable")
+        ist(option(result, "true"), undefined)
+
+        const shadow = await complete("#let red = blue\n#strike(stroke: re")
+        ist(option(shadow, "red").type, "variable")
+    })
+
     it("supports code blocks and explicit completion at an empty expression", async () => {
         const result = await complete("#{ }", 2, true)
         ist(result.from, 2)

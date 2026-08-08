@@ -55,4 +55,9 @@ while `strike(stroke: ` offers `auto`, named colors, length values, gradients,
 strokes, tilings, and dictionaries. Literal enums and set-rule parameters are
 supported as well.
 
+Autocomplete also follows lexical scope for document-local `let` variables,
+named and closure-valued functions, function parameters, destructuring
+bindings, and `for` loop bindings. Local definitions shadow built-ins and are
+only suggested where they are visible.
+
 Autocomplete is intentionally not registered by the legacy `typst()` support.

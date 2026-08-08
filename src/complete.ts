@@ -288,6 +288,198 @@ function globalProperties(path: readonly string[]): readonly Completion[] | null
     }
 }
 
+const localBindingBoost = 25
+
+function localVariableCompletion(label: string, detail = "Local variable"): Completion {
+    return {
+        label,
+        type: "variable",
+        detail,
+        boost: localBindingBoost,
+    }
+}
+
+function localFunctionCompletion(
+    label: string,
+    parameterList: string | null,
+): Completion {
+    return {
+        label,
+        type: "function",
+        detail: parameterList ? `Local function ${parameterList}` : "Local function",
+        commitCharacters: ["("],
+        boost: localBindingBoost,
+    }
+}
+
+function sameNode(left: SyntaxNode, right: SyntaxNode): boolean {
+    return left.name === right.name && left.from === right.from && left.to === right.to
+}
+
+function directChildren(node: SyntaxNode): SyntaxNode[] {
+    const children: SyntaxNode[] = []
+    for (let child = node.firstChild; child; child = child.nextSibling) {
+        children.push(child)
+    }
+    return children
+}
+
+function addPatternBindings(
+    context: CompletionContext,
+    pattern: SyntaxNode,
+    add: (completion: Completion) => void,
+): void {
+    if (pattern.name === "Ident") {
+        add(localVariableCompletion(context.state.sliceDoc(pattern.from, pattern.to)))
+        return
+    }
+
+    if (pattern.name === "Spread") {
+        const sink = pattern.getChild("Ident")
+        if (sink) addPatternBindings(context, sink, add)
+        return
+    }
+
+    if (pattern.name === "Named") {
+        // In a destructuring pattern such as `(key: binding)`, the identifier
+        // before the colon is the dictionary key rather than a new binding.
+        let afterColon = false
+        for (const child of directChildren(pattern)) {
+            if (child.name === "Colon") {
+                afterColon = true
+            } else if (afterColon &&
+                (child.name === "Ident" || child.name === "Destructuring" ||
+                    child.name === "Parenthesized" || child.name === "Spread")) {
+                addPatternBindings(context, child, add)
+                break
+            }
+        }
+        return
+    }
+
+    if (pattern.name !== "Destructuring" && pattern.name !== "Parenthesized") return
+    for (const child of directChildren(pattern)) {
+        if (child.name === "Ident" || child.name === "Destructuring" ||
+            child.name === "Parenthesized" || child.name === "Named" ||
+            child.name === "Spread") {
+            addPatternBindings(context, child, add)
+        }
+    }
+}
+
+function addParameterBindings(
+    context: CompletionContext,
+    params: SyntaxNode,
+    add: (completion: Completion) => void,
+): void {
+    for (const parameter of directChildren(params)) {
+        if (parameter.name === "Named") {
+            const name = parameter.getChild("Ident")
+            if (name) addPatternBindings(context, name, add)
+        } else if (parameter.name === "Ident" || parameter.name === "Destructuring" ||
+            parameter.name === "Parenthesized" || parameter.name === "Spread") {
+            addPatternBindings(context, parameter, add)
+        }
+    }
+}
+
+function lastSignificantChild(node: SyntaxNode): SyntaxNode | null {
+    let child = node.lastChild
+    while (child && (child.name === "Space" || child.name === "Parbreak" ||
+        child.name === "LineComment" || child.name === "BlockComment")) {
+        child = child.prevSibling
+    }
+    return child
+}
+
+function addLetBinding(
+    context: CompletionContext,
+    binding: SyntaxNode,
+    add: (completion: Completion) => void,
+    recursiveOnly: boolean,
+): void {
+    const bindingChildren = directChildren(binding)
+    const closure = bindingChildren.find(child => child.name === "Closure") ?? null
+    const closureStart = closure?.firstChild ?? null
+    const functionName = closureStart?.name === "Ident" ? closureStart : null
+    if (closure && functionName) {
+        const params = closure.getChild("Params")
+        add(localFunctionCompletion(
+            context.state.sliceDoc(functionName.from, functionName.to),
+            params ? context.state.sliceDoc(params.from, params.to) : null,
+        ))
+        return
+    }
+
+    // A normal variable is not visible in its own initializer. Named
+    // functions are the exception so that recursive calls can be completed.
+    if (recursiveOnly) return
+    for (const child of bindingChildren) {
+        if (child.name === "Ident" || child.name === "Destructuring" ||
+            child.name === "Parenthesized") {
+            if (child.name === "Ident" && closure) {
+                const params = closure.getChild("Params")
+                add(localFunctionCompletion(
+                    context.state.sliceDoc(child.from, child.to),
+                    params ? context.state.sliceDoc(params.from, params.to) : null,
+                ))
+            } else {
+                addPatternBindings(context, child, add)
+            }
+            return
+        }
+    }
+}
+
+/** Collect lexical bindings visible at the completion position, nearest first. */
+function localCompletions(
+    context: CompletionContext,
+    node: SyntaxNode,
+): readonly Completion[] {
+    const completions: Completion[] = []
+    const seen = new Set<string>()
+    const add = (completion: Completion) => {
+        if (!completion.label || seen.has(completion.label)) return
+        seen.add(completion.label)
+        completions.push(completion)
+    }
+
+    for (let current: SyntaxNode | null = node; current;) {
+        // Bindings in earlier siblings belong to the current lexical scope.
+        // The current let binding itself is included only for named functions,
+        // which Typst permits to recursively reference themselves.
+        for (let sibling: SyntaxNode | null = current; sibling;
+            sibling = sibling.prevSibling) {
+            if (sibling.name === "LetBinding") {
+                addLetBinding(context, sibling, add, sameNode(sibling, current))
+            }
+        }
+
+        const parent: SyntaxNode | null = current.parent
+        if (!parent) break
+
+        if (parent.name === "Closure") {
+            const body = lastSignificantChild(parent)
+            const params = parent.getChild("Params")
+            if (body && params && sameNode(body, current)) {
+                addParameterBindings(context, params, add)
+            }
+        } else if (parent.name === "ForLoop") {
+            const body = lastSignificantChild(parent)
+            if (body && sameNode(body, current)) {
+                const pattern = directChildren(parent).find(child =>
+                    child.name === "Ident" || child.name === "Destructuring" ||
+                    child.name === "Parenthesized")
+                if (pattern) addPatternBindings(context, pattern, add)
+            }
+        }
+
+        current = parent
+    }
+
+    return completions
+}
+
 function propertyCompletion(
     context: CompletionContext,
     node: SyntaxNode,
@@ -567,6 +759,7 @@ function parameterCompletion(
     context: CompletionContext,
     treeNode: SyntaxNode,
     word: {from: number, to: number, text: string},
+    locals: readonly Completion[],
 ): CompletionResult | null {
     const site = callSite(context, treeNode)
     if (!site) return null
@@ -583,7 +776,9 @@ function parameterCompletion(
         const token = context.matchBefore(/(?:"[^"\n]*|[\p{ID_Continue}_-]*)$/u) ?? word
         return {
             from: token.from,
-            options: parameter ? completionsForInput(parameter[2]) : [],
+            options: parameter
+                ? unique(locals, completionsForInput(parameter[2]))
+                : locals,
         }
     }
 
@@ -595,6 +790,10 @@ function parameterCompletion(
                 .map(parameterNameCompletion),
         )
     }
+
+    // Local values shadow same-named built-ins while parameter names retain
+    // their stronger call-site priority.
+    completionGroups.push(locals)
 
     const positional = available.filter(parameter => (parameter[1] & POSITIONAL) !== 0)
     const positionalParameter = positional[Math.min(state.positional, positional.length - 1)]
@@ -629,7 +828,8 @@ export const typstCompletionSource: CompletionSource = (
     const property = propertyCompletion(context, node, word)
     if (property) return property
 
-    const parameter = parameterCompletion(context, node, word)
+    const locals = localCompletions(context, node)
+    const parameter = parameterCompletion(context, node, word, locals)
     if (parameter) return parameter
 
     const afterHash = word.from > 0 && context.state.sliceDoc(word.from - 1, word.from) === "#"
@@ -640,7 +840,10 @@ export const typstCompletionSource: CompletionSource = (
 
     return {
         from: word.from,
-        options: scope === "math" ? typstMathCompletions : typstGlobalCompletions,
+        options: unique(
+            locals,
+            scope === "math" ? typstMathCompletions : typstGlobalCompletions,
+        ),
         validFor: validIdentifier,
     }
 }
