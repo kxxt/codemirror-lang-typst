@@ -6,6 +6,10 @@ import type {
 } from "@codemirror/autocomplete"
 import {syntaxTree} from "@codemirror/language"
 import type {SyntaxNode} from "@lezer/common"
+import {
+    typstBuiltinSignatures,
+    type TypstBuiltinParameter,
+} from "./signatures"
 import {typstSymbolPropertyNames} from "./symbols"
 
 function words(source: string): string[] {
@@ -64,11 +68,19 @@ const globalTypes = words(`
     counter state
 `)
 
-const globalConstants = words(`
-    none auto true false black gray silver white navy blue aqua teal eastern purple
-    fuchsia maroon red orange yellow olive green lime ltr rtl ttb btt start left
-    center right end top horizon bottom
+const colorConstants = words(`
+    black gray silver white navy blue aqua teal eastern purple fuchsia maroon red
+    orange yellow olive green lime
 `)
+
+const directionConstants = words(`ltr rtl ttb btt`)
+const alignmentConstants = words(`start left center right end top horizon bottom`)
+const globalConstants = [
+    ...words("none auto true false"),
+    ...colorConstants,
+    ...directionConstants,
+    ...alignmentConstants,
+]
 
 const globalModules = words(`
     std calc sys math pdf sym emoji
@@ -301,6 +313,306 @@ function propertyCompletion(
     }
 }
 
+const POSITIONAL = 1
+const NAMED = 2
+const VARIADIC = 4
+const SETTABLE = 16
+
+function valueCompletion(
+    label: string,
+    type: string,
+    detail: string,
+    apply?: string,
+): Completion {
+    return {label, type, detail, apply}
+}
+
+const colorValueCompletions = unique(
+    options(colorConstants, "constant", "Typst color"),
+    options(words("luma oklab oklch rgb cmyk"), "function", "Typst color constructor"),
+)
+
+const directionValueCompletions = options(
+    directionConstants,
+    "constant",
+    "Typst direction",
+)
+
+const alignmentValueCompletions = options(
+    alignmentConstants,
+    "constant",
+    "Typst alignment",
+)
+
+const inputCompletionCache = new Map<string, readonly Completion[]>()
+
+function completionsForInput(input: readonly string[]): readonly Completion[] {
+    const cacheKey = input.join("\u001f")
+    const cached = inputCompletionCache.get(cacheKey)
+    if (cached) return cached
+
+    const groups: (readonly Completion[])[] = []
+    for (const part of input) {
+        if (part.startsWith("value:")) {
+            groups.push([
+                valueCompletion(part.slice(6), "enum", "Accepted value"),
+            ])
+            continue
+        }
+
+        const type = part.startsWith("type:") ? part.slice(5) : part
+        switch (type) {
+            case "any":
+                groups.push(typstGlobalCompletions)
+                break
+            case "auto":
+            case "none":
+                groups.push([valueCompletion(type, "constant", `Typst ${type} value`)])
+                break
+            case "bool":
+                groups.push(options(words("true false"), "constant", "Boolean value"))
+                break
+            case "color":
+                groups.push(colorValueCompletions)
+                break
+            case "alignment":
+                groups.push(alignmentValueCompletions)
+                break
+            case "direction":
+                groups.push(directionValueCompletions)
+                break
+            case "length":
+                groups.push(options(words("1pt 1em 1cm"), "constant", "Length value"))
+                break
+            case "relative":
+                groups.push(options(words("1pt 100%"), "constant", "Relative length"))
+                break
+            case "ratio":
+                groups.push([valueCompletion("100%", "constant", "Ratio value")])
+                break
+            case "fraction":
+                groups.push([valueCompletion("1fr", "constant", "Fraction value")])
+                break
+            case "angle":
+                groups.push([valueCompletion("0deg", "constant", "Angle value")])
+                break
+            case "int":
+                groups.push(options(words("0 1"), "constant", "Integer value"))
+                break
+            case "float":
+                groups.push([valueCompletion("0.0", "constant", "Floating-point value")])
+                break
+            case "str":
+                groups.push([valueCompletion("string", "text", "String value", "\"\"")])
+                break
+            case "content":
+                groups.push([valueCompletion("content", "text", "Content value", "[]")])
+                break
+            case "array":
+                groups.push([valueCompletion("array", "type", "Array value", "()")])
+                break
+            case "dictionary":
+                groups.push([valueCompletion("dictionary", "type", "Dictionary value", "(:)")])
+                break
+            case "function":
+                groups.push([
+                    valueCompletion("function", "function", "Function value", "(value) => value"),
+                ])
+                break
+            case "label":
+                groups.push([valueCompletion("label", "type", "Label value", "<label>")])
+                break
+            case "gradient":
+            case "stroke":
+            case "tiling": {
+                const completion = typstGlobalCompletions.find(option => option.label === type)
+                if (completion) groups.push([completion])
+                break
+            }
+            default: {
+                const completion = typstGlobalCompletions.find(option => option.label === type)
+                groups.push(completion
+                    ? [completion]
+                    : [valueCompletion(type, "type", `Value of type ${type}`)])
+                break
+            }
+        }
+    }
+
+    const result = unique(...groups)
+    inputCompletionCache.set(cacheKey, result)
+    return result
+}
+
+const argumentBarriers = new Set([
+    "Array", "Dict", "Parenthesized", "CodeBlock", "ContentBlock",
+])
+
+function activeArgs(node: SyntaxNode): SyntaxNode | null {
+    for (let current: SyntaxNode | null = node; current; current = current.parent) {
+        if (current.name === "Args" || current.name === "MathArgs") return current
+        if (argumentBarriers.has(current.name)) return null
+    }
+    return null
+}
+
+type CallSite = {
+    signature: readonly TypstBuiltinParameter[],
+    argsFrom: number,
+    setRule: boolean,
+}
+
+function callSite(
+    context: CompletionContext,
+    treeNode: SyntaxNode,
+): CallSite | null {
+    let probe = context.pos
+    while (probe > 0 && /\s/u.test(context.state.sliceDoc(probe - 1, probe))) probe--
+    const node = probe === context.pos
+        ? treeNode
+        : syntaxTree(context.state).resolveInner(probe, -1)
+    const args = activeArgs(node)
+    const parent = args?.parent
+    if (!args || !parent) return null
+
+    let callee: string | null = null
+    let setRule = false
+    if (parent.name === "FuncCall" || parent.name === "MathCall") {
+        callee = context.state.sliceDoc(parent.from, args.from).trim().replace(/\s+/gu, "")
+        if (parent.name === "MathCall" && !callee.includes(".")) callee = `math.${callee}`
+    } else if (parent.name === "SetRule") {
+        const before = context.state.sliceDoc(parent.from, args.from)
+        const match = /\bset\s+([\p{ID_Continue}_-]+(?:\.[\p{ID_Continue}_-]+)*)\s*$/u.exec(before)
+        callee = match?.[1] ?? null
+        setRule = true
+    }
+
+    if (!callee) return null
+    if (callee.startsWith("std.")) callee = callee.slice(4)
+    const signature = typstBuiltinSignatures[callee]
+    return signature ? {signature, argsFrom: args.from + 1, setRule} : null
+}
+
+type ArgumentState = {
+    current: string,
+    existingNamed: ReadonlySet<string>,
+    positional: number,
+    first: boolean,
+}
+
+function argumentState(text: string): ArgumentState {
+    const starts = [0]
+    const stack: string[] = []
+    let quote = false
+    let escaped = false
+    let lineComment = false
+    let blockComment = 0
+
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i]
+        const next = text[i + 1]
+        if (lineComment) {
+            if (ch === "\n") lineComment = false
+            continue
+        }
+        if (blockComment) {
+            if (ch === "/" && next === "*") { blockComment++; i++; continue }
+            if (ch === "*" && next === "/") { blockComment--; i++; continue }
+            continue
+        }
+        if (quote) {
+            if (escaped) escaped = false
+            else if (ch === "\\") escaped = true
+            else if (ch === "\"") quote = false
+            continue
+        }
+        if (ch === "/" && next === "/") { lineComment = true; i++; continue }
+        if (ch === "/" && next === "*") { blockComment = 1; i++; continue }
+        if (ch === "\"") { quote = true; continue }
+        if (ch === "(" || ch === "[" || ch === "{") stack.push(ch)
+        else if (ch === ")" || ch === "]" || ch === "}") stack.pop()
+        else if (ch === "," && stack.length === 0) starts.push(i + 1)
+    }
+
+    const existingNamed = new Set<string>()
+    let positional = 0
+    for (let i = 0; i < starts.length - 1; i++) {
+        const segment = text.slice(starts[i], starts[i + 1] - 1).trim()
+        const named = /^([\p{ID_Start}_][\p{ID_Continue}_-]*)\s*:/u.exec(segment)
+        if (named) existingNamed.add(named[1])
+        else if (segment) positional++
+    }
+
+    return {
+        current: text.slice(starts[starts.length - 1]),
+        existingNamed,
+        positional,
+        first: starts.length === 1,
+    }
+}
+
+function parameterNameCompletion(parameter: TypstBuiltinParameter): Completion {
+    const [name, , input] = parameter
+    const accepts = input.map(part => part.replace(/^(?:type|value):/, "")).join(" | ")
+    return {
+        label: name,
+        apply: `${name}: `,
+        type: "property",
+        detail: accepts ? `parameter · ${accepts}` : "parameter",
+        boost: 50,
+    }
+}
+
+function parameterCompletion(
+    context: CompletionContext,
+    treeNode: SyntaxNode,
+    word: {from: number, to: number, text: string},
+): CompletionResult | null {
+    const site = callSite(context, treeNode)
+    if (!site) return null
+
+    const state = argumentState(context.state.sliceDoc(site.argsFrom, context.pos))
+    const available = site.signature.filter(parameter =>
+        (!site.setRule || (parameter[1] & SETTABLE) !== 0) &&
+        !state.existingNamed.has(parameter[0]))
+    const named = /^\s*([\p{ID_Start}_][\p{ID_Continue}_-]*)\s*:/u.exec(state.current)
+
+    if (named) {
+        const parameter = site.signature.find(item =>
+            item[0] === named[1] && (!site.setRule || (item[1] & SETTABLE) !== 0))
+        const token = context.matchBefore(/(?:"[^"\n]*|[\p{ID_Continue}_-]*)$/u) ?? word
+        return {
+            from: token.from,
+            options: parameter ? completionsForInput(parameter[2]) : [],
+        }
+    }
+
+    const completionGroups: (readonly Completion[])[] = []
+    if (/^\s*[\p{ID_Continue}_-]*$/u.test(state.current)) {
+        completionGroups.push(
+            available
+                .filter(parameter => (parameter[1] & NAMED) !== 0)
+                .map(parameterNameCompletion),
+        )
+    }
+
+    const positional = available.filter(parameter => (parameter[1] & POSITIONAL) !== 0)
+    const positionalParameter = positional[Math.min(state.positional, positional.length - 1)]
+    if (positionalParameter &&
+        (state.positional < positional.length || (positionalParameter[1] & VARIADIC) !== 0)) {
+        completionGroups.push(completionsForInput(positionalParameter[2]))
+    }
+
+    // At the beginning of a call, also surface values accepted by the first
+    // configurable parameter. This makes `strike(` immediately offer colors
+    // and `auto` alongside the named `stroke:` completion.
+    if (state.first && site.signature[0]) {
+        completionGroups.push(completionsForInput(site.signature[0][2]))
+    }
+
+    return {from: word.from, options: unique(...completionGroups)}
+}
+
 /**
  * CodeMirror completion source for Typst 0.15 built-ins.
  *
@@ -317,6 +629,9 @@ export const typstCompletionSource: CompletionSource = (
     const property = propertyCompletion(context, node, word)
     if (property) return property
 
+    const parameter = parameterCompletion(context, node, word)
+    if (parameter) return parameter
+
     const afterHash = word.from > 0 && context.state.sliceDoc(word.from - 1, word.from) === "#"
     if (word.from === word.to && !context.explicit && !afterHash) return null
 
@@ -329,3 +644,6 @@ export const typstCompletionSource: CompletionSource = (
         validFor: validIdentifier,
     }
 }
+
+export {typstBuiltinSignatures} from "./signatures"
+export type {TypstBuiltinParameter} from "./signatures"

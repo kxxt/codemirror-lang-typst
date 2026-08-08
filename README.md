@@ -48,4 +48,11 @@ Completions understand built-in field access, including symbol modifiers such
 as `arrow.r`, nested modifiers such as `arrow.r.long`, and namespaces such as
 `sym.arrow`, `math.sqrt`, `calc.sin`, and `sys.version`.
 
+Built-in calls also complete their parameter names and accepted values. The
+metadata is generated from Typst 0.15's reflected function signatures. For
+example, `strike(` offers `stroke:`, `offset:`, `extent:`, and `background:`,
+while `strike(stroke: ` offers `auto`, named colors, length values, gradients,
+strokes, tilings, and dictionaries. Literal enums and set-rule parameters are
+supported as well.
+
 Autocomplete is intentionally not registered by the legacy `typst()` support.

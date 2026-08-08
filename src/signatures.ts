@@ -1,0 +1,1041 @@
+/**
+ * Compact Typst 0.15 built-in signature metadata.
+ *
+ * Generated from typst-library's runtime reflection data. Parameter flag bits
+ * are positional (1), named (2), variadic (4), required (8), and settable (16).
+ */
+export type TypstBuiltinParameter = readonly [
+    name: string,
+    flags: number,
+    input: readonly string[],
+]
+
+export const typstBuiltinSignatures: Readonly<
+    Record<string, readonly TypstBuiltinParameter[]>
+> = {
+    "int": [
+        ["value", 9, ["type:bool","type:decimal","type:float","type:int","type:str"]],
+        ["base", 2, ["type:int"]],
+    ],
+    "float": [
+        ["value", 9, ["type:bool","type:decimal","type:float","type:int","type:ratio","type:str"]],
+    ],
+    "str": [
+        ["value", 9, ["type:bytes","type:decimal","type:float","type:int","type:label","type:str","type:type","type:version"]],
+        ["base", 2, ["type:int"]],
+    ],
+    "label": [
+        ["name", 9, ["type:str"]],
+    ],
+    "bytes": [
+        ["value", 9, ["type:array","type:bytes","type:str"]],
+    ],
+    "array": [
+        ["value", 9, ["type:array","type:bytes","type:version"]],
+    ],
+    "dictionary": [
+        ["value", 9, ["type:module"]],
+    ],
+    "arguments": [
+        ["arguments", 13, ["any"]],
+    ],
+    "type": [
+        ["value", 9, ["any"]],
+    ],
+    "regex": [
+        ["regex", 9, ["type:str"]],
+    ],
+    "selector": [
+        ["target", 9, ["type:function","type:label","type:location","type:regex","type:selector","type:str"]],
+    ],
+    "datetime": [
+        ["year", 2, ["type:int"]],
+        ["month", 2, ["type:int"]],
+        ["day", 2, ["type:int"]],
+        ["hour", 2, ["type:int"]],
+        ["minute", 2, ["type:int"]],
+        ["second", 2, ["type:int"]],
+    ],
+    "decimal": [
+        ["value", 9, ["type:bool","type:decimal","type:float","type:int","type:str"]],
+    ],
+    "symbol": [
+        ["variants", 13, ["type:array","type:str"]],
+    ],
+    "duration": [
+        ["seconds", 2, ["type:int"]],
+        ["minutes", 2, ["type:int"]],
+        ["hours", 2, ["type:int"]],
+        ["days", 2, ["type:int"]],
+        ["weeks", 2, ["type:int"]],
+    ],
+    "version": [
+        ["components", 13, ["type:array","type:int"]],
+    ],
+    "path": [
+        ["path", 9, ["type:path","type:str"]],
+    ],
+    "repr": [
+        ["value", 9, ["any"]],
+    ],
+    "panic": [
+        ["values", 13, ["any"]],
+    ],
+    "assert": [
+        ["condition", 9, ["type:bool"]],
+        ["message", 2, ["type:str"]],
+    ],
+    "eval": [
+        ["source", 9, ["type:str"]],
+        ["mode", 2, ["value:\"code\"","value:\"markup\"","value:\"math\""]],
+        ["scope", 2, ["type:dictionary"]],
+    ],
+    "plugin": [
+        ["source", 9, ["type:bytes","type:path","type:str"]],
+    ],
+    "calc.abs": [
+        ["value", 9, ["type:angle","type:decimal","type:float","type:fraction","type:int","type:length","type:ratio"]],
+    ],
+    "calc.pow": [
+        ["base", 9, ["type:decimal","type:float","type:int"]],
+        ["exponent", 9, ["type:float","type:int"]],
+    ],
+    "calc.exp": [
+        ["exponent", 9, ["type:float","type:int"]],
+    ],
+    "calc.sqrt": [
+        ["value", 9, ["type:float","type:int"]],
+    ],
+    "calc.root": [
+        ["radicand", 9, ["type:float"]],
+        ["index", 9, ["type:int"]],
+    ],
+    "calc.sin": [
+        ["angle", 9, ["type:angle","type:float","type:int"]],
+    ],
+    "calc.cos": [
+        ["angle", 9, ["type:angle","type:float","type:int"]],
+    ],
+    "calc.tan": [
+        ["angle", 9, ["type:angle","type:float","type:int"]],
+    ],
+    "calc.asin": [
+        ["value", 9, ["type:float","type:int"]],
+    ],
+    "calc.acos": [
+        ["value", 9, ["type:float","type:int"]],
+    ],
+    "calc.atan": [
+        ["value", 9, ["type:float","type:int"]],
+    ],
+    "calc.atan2": [
+        ["x", 9, ["type:float","type:int"]],
+        ["y", 9, ["type:float","type:int"]],
+    ],
+    "calc.sinh": [
+        ["value", 9, ["type:float"]],
+    ],
+    "calc.cosh": [
+        ["value", 9, ["type:float"]],
+    ],
+    "calc.tanh": [
+        ["value", 9, ["type:float"]],
+    ],
+    "calc.asinh": [
+        ["value", 9, ["type:float"]],
+    ],
+    "calc.acosh": [
+        ["value", 9, ["type:float"]],
+    ],
+    "calc.atanh": [
+        ["value", 9, ["type:float"]],
+    ],
+    "calc.log": [
+        ["value", 9, ["type:float","type:int"]],
+        ["base", 2, ["type:float"]],
+    ],
+    "calc.ln": [
+        ["value", 9, ["type:float","type:int"]],
+    ],
+    "calc.erf": [
+        ["value", 9, ["type:float"]],
+    ],
+    "calc.fact": [
+        ["number", 9, ["type:int"]],
+    ],
+    "calc.perm": [
+        ["base", 9, ["type:int"]],
+        ["numbers", 9, ["type:int"]],
+    ],
+    "calc.binom": [
+        ["n", 9, ["type:int"]],
+        ["k", 9, ["type:int"]],
+    ],
+    "calc.gcd": [
+        ["a", 9, ["type:int"]],
+        ["b", 9, ["type:int"]],
+    ],
+    "calc.lcm": [
+        ["a", 9, ["type:int"]],
+        ["b", 9, ["type:int"]],
+    ],
+    "calc.floor": [
+        ["value", 9, ["type:decimal","type:float","type:int"]],
+    ],
+    "calc.ceil": [
+        ["value", 9, ["type:decimal","type:float","type:int"]],
+    ],
+    "calc.trunc": [
+        ["value", 9, ["type:decimal","type:float","type:int"]],
+    ],
+    "calc.fract": [
+        ["value", 9, ["type:decimal","type:float","type:int"]],
+    ],
+    "calc.round": [
+        ["value", 9, ["type:decimal","type:float","type:int"]],
+        ["digits", 2, ["type:int"]],
+    ],
+    "calc.clamp": [
+        ["value", 9, ["type:decimal","type:float","type:int"]],
+        ["min", 9, ["type:decimal","type:float","type:int"]],
+        ["max", 9, ["type:decimal","type:float","type:int"]],
+    ],
+    "calc.min": [
+        ["values", 13, ["any"]],
+    ],
+    "calc.max": [
+        ["values", 13, ["any"]],
+    ],
+    "calc.even": [
+        ["value", 9, ["type:int"]],
+    ],
+    "calc.odd": [
+        ["value", 9, ["type:int"]],
+    ],
+    "calc.rem": [
+        ["dividend", 9, ["type:decimal","type:float","type:int"]],
+        ["divisor", 9, ["type:decimal","type:float","type:int"]],
+    ],
+    "calc.div-euclid": [
+        ["dividend", 9, ["type:decimal","type:float","type:int"]],
+        ["divisor", 9, ["type:decimal","type:float","type:int"]],
+    ],
+    "calc.rem-euclid": [
+        ["dividend", 9, ["type:decimal","type:float","type:int"]],
+        ["divisor", 9, ["type:decimal","type:float","type:int"]],
+    ],
+    "calc.quo": [
+        ["dividend", 9, ["type:decimal","type:float","type:int"]],
+        ["divisor", 9, ["type:decimal","type:float","type:int"]],
+    ],
+    "calc.norm": [
+        ["p", 2, ["type:float"]],
+        ["values", 13, ["type:float"]],
+    ],
+    "document": [
+        ["path", 9, ["type:str"]],
+        ["format", 18, ["type:auto","value:\"html\"","value:\"pdf\"","value:\"png\"","value:\"svg\""]],
+        ["title", 18, ["type:content","type:none"]],
+        ["author", 18, ["type:array","type:str"]],
+        ["description", 18, ["type:content","type:none"]],
+        ["keywords", 18, ["type:array","type:str"]],
+        ["date", 18, ["type:auto","type:datetime","type:none"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "par": [
+        ["leading", 18, ["type:length"]],
+        ["spacing", 18, ["type:length"]],
+        ["justify", 18, ["type:bool"]],
+        ["justification-limits", 18, ["type:dictionary"]],
+        ["linebreaks", 18, ["type:auto","value:\"optimized\"","value:\"simple\""]],
+        ["first-line-indent", 18, ["type:dictionary","type:length"]],
+        ["hanging-indent", 18, ["type:length"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "strong": [
+        ["delta", 18, ["type:int"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "emph": [
+        ["body", 9, ["type:content"]],
+    ],
+    "list": [
+        ["tight", 18, ["type:bool"]],
+        ["marker", 18, ["type:array","type:content","type:function"]],
+        ["indent", 18, ["type:length"]],
+        ["body-indent", 18, ["type:length"]],
+        ["spacing", 18, ["type:auto","type:length"]],
+        ["marker-align", 18, ["type:alignment"]],
+        ["children", 13, ["type:content"]],
+    ],
+    "enum": [
+        ["tight", 18, ["type:bool"]],
+        ["numbering", 18, ["type:function","type:str"]],
+        ["start", 18, ["type:auto","type:int"]],
+        ["full", 18, ["type:bool"]],
+        ["reversed", 18, ["type:bool"]],
+        ["indent", 18, ["type:length"]],
+        ["body-indent", 18, ["type:length"]],
+        ["spacing", 18, ["type:auto","type:length"]],
+        ["number-align", 18, ["type:alignment"]],
+        ["children", 13, ["type:array","type:content"]],
+    ],
+    "terms": [
+        ["tight", 18, ["type:bool"]],
+        ["separator", 18, ["type:content"]],
+        ["indent", 18, ["type:length"]],
+        ["hanging-indent", 18, ["type:length"]],
+        ["spacing", 18, ["type:auto","type:length"]],
+        ["children", 13, ["type:array","type:content"]],
+    ],
+    "link": [
+        ["dest", 9, ["type:dictionary","type:label","type:location","type:str"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "title": [
+        ["body", 17, ["type:auto","type:content"]],
+    ],
+    "heading": [
+        ["level", 18, ["type:auto","type:int"]],
+        ["depth", 18, ["type:int"]],
+        ["offset", 18, ["type:int"]],
+        ["numbering", 18, ["type:function","type:none","type:str"]],
+        ["supplement", 18, ["type:auto","type:content","type:function","type:none"]],
+        ["outlined", 18, ["type:bool"]],
+        ["bookmarked", 18, ["type:auto","type:bool"]],
+        ["hanging-indent", 18, ["type:auto","type:length"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "figure": [
+        ["body", 9, ["type:content"]],
+        ["alt", 18, ["type:none","type:str"]],
+        ["placement", 18, ["type:alignment","type:auto","type:none"]],
+        ["scope", 18, ["value:\"column\"","value:\"parent\""]],
+        ["caption", 18, ["type:content","type:none"]],
+        ["kind", 18, ["type:auto","type:function","type:str"]],
+        ["supplement", 18, ["type:auto","type:content","type:function","type:none"]],
+        ["numbering", 18, ["type:function","type:none","type:str"]],
+        ["gap", 18, ["type:length"]],
+        ["outlined", 18, ["type:bool"]],
+    ],
+    "quote": [
+        ["block", 18, ["type:bool"]],
+        ["quotes", 18, ["type:auto","type:bool"]],
+        ["attribution", 18, ["type:content","type:label","type:none"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "footnote": [
+        ["numbering", 18, ["type:function","type:str"]],
+        ["body", 9, ["type:content","type:label"]],
+    ],
+    "outline": [
+        ["title", 18, ["type:auto","type:content","type:none"]],
+        ["target", 18, ["type:function","type:label","type:location","type:selector"]],
+        ["depth", 18, ["type:int","type:none"]],
+        ["indent", 18, ["type:auto","type:function","type:relative"]],
+    ],
+    "ref": [
+        ["target", 9, ["type:label"]],
+        ["supplement", 18, ["type:auto","type:content","type:function","type:none"]],
+        ["form", 18, ["value:\"normal\"","value:\"page\""]],
+    ],
+    "cite": [
+        ["key", 9, ["type:label"]],
+        ["supplement", 18, ["type:content","type:none"]],
+        ["form", 18, ["type:none","value:\"author\"","value:\"full\"","value:\"normal\"","value:\"prose\"","value:\"year\""]],
+        ["style", 18, ["type:auto","type:bytes","type:path","type:str","value:\"alphanumeric\"","value:\"american-anthropological-association\"","value:\"american-chemical-society\"","value:\"american-geophysical-union\"","value:\"american-institute-of-aeronautics-and-astronautics\"","value:\"american-institute-of-physics\"","value:\"american-medical-association\"","value:\"american-meteorological-society\"","value:\"american-physics-society\"","value:\"american-physiological-society\"","value:\"american-political-science-association\"","value:\"american-psychological-association\"","value:\"american-society-for-microbiology\"","value:\"american-society-of-civil-engineers\"","value:\"american-society-of-mechanical-engineers\"","value:\"american-sociological-association\"","value:\"angewandte-chemie\"","value:\"annual-reviews\"","value:\"annual-reviews-author-date\"","value:\"apa\"","value:\"associacao-brasileira-de-normas-tecnicas\"","value:\"association-for-computing-machinery\"","value:\"biomed-central\"","value:\"bmj\"","value:\"bristol-university-press\"","value:\"british-medical-journal\"","value:\"cell\"","value:\"chicago-author-date\"","value:\"chicago-fullnotes\"","value:\"chicago-notes\"","value:\"chicago-shortened-notes\"","value:\"copernicus\"","value:\"council-of-science-editors\"","value:\"council-of-science-editors-author-date\"","value:\"cse-citation-sequence-brackets-8th-edition\"","value:\"cse-name-year\"","value:\"current-opinion\"","value:\"deutsche-gesellschaft-für-psychologie\"","value:\"deutsche-sprache\"","value:\"elsevier-harvard\"","value:\"elsevier-vancouver\"","value:\"elsevier-with-titles\"","value:\"frontiers\"","value:\"future-medicine\"","value:\"future-science\"","value:\"gb-7714-2005-numeric\"","value:\"gb-7714-2015-author-date\"","value:\"gb-7714-2015-note\"","value:\"gb-7714-2015-numeric\"","value:\"gost-r-705-2008-numeric\"","value:\"harvard-cite-them-right\"","value:\"ieee\"","value:\"institute-of-electrical-and-electronics-engineers\"","value:\"institute-of-physics-numeric\"","value:\"iso-690-author-date\"","value:\"iso-690-numeric\"","value:\"karger\"","value:\"mary-ann-liebert-vancouver\"","value:\"mla\"","value:\"mla-8\"","value:\"modern-humanities-research-association\"","value:\"modern-humanities-research-association-notes\"","value:\"modern-language-association\"","value:\"modern-language-association-8\"","value:\"multidisciplinary-digital-publishing-institute\"","value:\"nature\"","value:\"nlm-citation-sequence\"","value:\"nlm-citation-sequence-superscript\"","value:\"pensoft\"","value:\"plos\"","value:\"public-library-of-science\"","value:\"royal-society-of-chemistry\"","value:\"sage-vancouver\"","value:\"sist02\"","value:\"spie\"","value:\"springer-basic\"","value:\"springer-basic-author-date\"","value:\"springer-fachzeitschriften-medizin-psychologie\"","value:\"springer-humanities-author-date\"","value:\"springer-lecture-notes-in-computer-science\"","value:\"springer-mathphys\"","value:\"springer-socpsych-author-date\"","value:\"springer-vancouver\"","value:\"taylor-and-francis-chicago-author-date\"","value:\"taylor-and-francis-national-library-of-medicine\"","value:\"the-institution-of-engineering-and-technology\"","value:\"the-lancet\"","value:\"thieme\"","value:\"trends\"","value:\"turabian-author-date\"","value:\"turabian-fullnote-8\"","value:\"vancouver\"","value:\"vancouver-superscript\""]],
+    ],
+    "bibliography": [
+        ["sources", 9, ["type:array","type:bytes","type:path","type:str"]],
+        ["title", 18, ["type:auto","type:content","type:none"]],
+        ["full", 18, ["type:bool"]],
+        ["style", 18, ["type:bytes","type:path","type:str","value:\"alphanumeric\"","value:\"american-anthropological-association\"","value:\"american-chemical-society\"","value:\"american-geophysical-union\"","value:\"american-institute-of-aeronautics-and-astronautics\"","value:\"american-institute-of-physics\"","value:\"american-medical-association\"","value:\"american-meteorological-society\"","value:\"american-physics-society\"","value:\"american-physiological-society\"","value:\"american-political-science-association\"","value:\"american-psychological-association\"","value:\"american-society-for-microbiology\"","value:\"american-society-of-civil-engineers\"","value:\"american-society-of-mechanical-engineers\"","value:\"american-sociological-association\"","value:\"angewandte-chemie\"","value:\"annual-reviews\"","value:\"annual-reviews-author-date\"","value:\"apa\"","value:\"associacao-brasileira-de-normas-tecnicas\"","value:\"association-for-computing-machinery\"","value:\"biomed-central\"","value:\"bmj\"","value:\"bristol-university-press\"","value:\"british-medical-journal\"","value:\"cell\"","value:\"chicago-author-date\"","value:\"chicago-fullnotes\"","value:\"chicago-notes\"","value:\"chicago-shortened-notes\"","value:\"copernicus\"","value:\"council-of-science-editors\"","value:\"council-of-science-editors-author-date\"","value:\"cse-citation-sequence-brackets-8th-edition\"","value:\"cse-name-year\"","value:\"current-opinion\"","value:\"deutsche-gesellschaft-für-psychologie\"","value:\"deutsche-sprache\"","value:\"elsevier-harvard\"","value:\"elsevier-vancouver\"","value:\"elsevier-with-titles\"","value:\"frontiers\"","value:\"future-medicine\"","value:\"future-science\"","value:\"gb-7714-2005-numeric\"","value:\"gb-7714-2015-author-date\"","value:\"gb-7714-2015-note\"","value:\"gb-7714-2015-numeric\"","value:\"gost-r-705-2008-numeric\"","value:\"harvard-cite-them-right\"","value:\"ieee\"","value:\"institute-of-electrical-and-electronics-engineers\"","value:\"institute-of-physics-numeric\"","value:\"iso-690-author-date\"","value:\"iso-690-numeric\"","value:\"karger\"","value:\"mary-ann-liebert-vancouver\"","value:\"mla\"","value:\"mla-8\"","value:\"modern-humanities-research-association\"","value:\"modern-humanities-research-association-notes\"","value:\"modern-language-association\"","value:\"modern-language-association-8\"","value:\"multidisciplinary-digital-publishing-institute\"","value:\"nature\"","value:\"nlm-citation-sequence\"","value:\"nlm-citation-sequence-superscript\"","value:\"pensoft\"","value:\"plos\"","value:\"public-library-of-science\"","value:\"royal-society-of-chemistry\"","value:\"sage-vancouver\"","value:\"sist02\"","value:\"spie\"","value:\"springer-basic\"","value:\"springer-basic-author-date\"","value:\"springer-fachzeitschriften-medizin-psychologie\"","value:\"springer-humanities-author-date\"","value:\"springer-lecture-notes-in-computer-science\"","value:\"springer-mathphys\"","value:\"springer-socpsych-author-date\"","value:\"springer-vancouver\"","value:\"taylor-and-francis-chicago-author-date\"","value:\"taylor-and-francis-national-library-of-medicine\"","value:\"the-institution-of-engineering-and-technology\"","value:\"the-lancet\"","value:\"thieme\"","value:\"trends\"","value:\"turabian-author-date\"","value:\"turabian-fullnote-8\"","value:\"vancouver\"","value:\"vancouver-superscript\""]],
+        ["target", 18, ["type:auto","type:function","type:label","type:location","type:selector"]],
+        ["group", 18, ["type:auto","type:none","type:str"]],
+    ],
+    "table": [
+        ["columns", 18, ["type:array","type:auto","type:fraction","type:int","type:relative"]],
+        ["rows", 18, ["type:array","type:auto","type:fraction","type:int","type:relative"]],
+        ["gutter", 2, ["type:array","type:auto","type:fraction","type:int","type:relative"]],
+        ["column-gutter", 18, ["type:array","type:auto","type:fraction","type:int","type:relative"]],
+        ["row-gutter", 18, ["type:array","type:auto","type:fraction","type:int","type:relative"]],
+        ["inset", 18, ["type:array","type:dictionary","type:function","type:relative"]],
+        ["align", 18, ["type:alignment","type:array","type:auto","type:function"]],
+        ["fill", 18, ["type:array","type:color","type:function","type:gradient","type:none","type:tiling"]],
+        ["stroke", 18, ["type:array","type:color","type:dictionary","type:function","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["children", 13, ["type:content"]],
+    ],
+    "numbering": [
+        ["numbering", 9, ["type:function","type:str"]],
+        ["numbers", 13, ["type:int"]],
+    ],
+    "text": [
+        ["font", 18, ["type:array","type:dictionary","type:str"]],
+        ["fallback", 18, ["type:bool"]],
+        ["style", 18, ["value:\"italic\"","value:\"normal\"","value:\"oblique\""]],
+        ["weight", 18, ["type:int","value:\"black\"","value:\"bold\"","value:\"extrabold\"","value:\"extralight\"","value:\"light\"","value:\"medium\"","value:\"regular\"","value:\"semibold\"","value:\"thin\""]],
+        ["stretch", 18, ["type:ratio"]],
+        ["size", 18, ["type:length"]],
+        ["fill", 18, ["type:color","type:gradient","type:tiling"]],
+        ["stroke", 18, ["type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["tracking", 18, ["type:length"]],
+        ["spacing", 18, ["type:relative"]],
+        ["cjk-latin-spacing", 18, ["type:auto","type:none"]],
+        ["baseline", 18, ["type:length"]],
+        ["overhang", 18, ["type:bool"]],
+        ["top-edge", 18, ["type:length","value:\"ascender\"","value:\"baseline\"","value:\"bounds\"","value:\"cap-height\"","value:\"x-height\""]],
+        ["bottom-edge", 18, ["type:length","value:\"baseline\"","value:\"bounds\"","value:\"descender\""]],
+        ["lang", 18, ["type:str"]],
+        ["region", 18, ["type:none","type:str"]],
+        ["script", 18, ["type:auto","type:str"]],
+        ["dir", 18, ["type:auto","type:direction"]],
+        ["hyphenate", 18, ["type:auto","type:bool"]],
+        ["costs", 18, ["type:dictionary"]],
+        ["kerning", 18, ["type:bool"]],
+        ["alternates", 18, ["type:bool","type:int"]],
+        ["stylistic-set", 18, ["type:array","type:int","type:none"]],
+        ["ligatures", 18, ["type:bool"]],
+        ["discretionary-ligatures", 18, ["type:bool"]],
+        ["historical-ligatures", 18, ["type:bool"]],
+        ["number-type", 18, ["type:auto","value:\"lining\"","value:\"old-style\""]],
+        ["number-width", 18, ["type:auto","value:\"proportional\"","value:\"tabular\""]],
+        ["slashed-zero", 18, ["type:bool"]],
+        ["fractions", 18, ["type:bool"]],
+        ["features", 18, ["type:array","type:dictionary"]],
+        ["variations", 18, ["type:dictionary"]],
+        ["body", 2, ["type:content"]],
+        ["text", 9, ["type:str"]],
+    ],
+    "linebreak": [
+        ["justify", 18, ["type:bool"]],
+    ],
+    "smartquote": [
+        ["double", 18, ["type:bool"]],
+        ["enabled", 18, ["type:bool"]],
+        ["alternative", 18, ["type:bool"]],
+        ["quotes", 18, ["type:array","type:auto","type:dictionary","type:str"]],
+    ],
+    "sub": [
+        ["typographic", 18, ["type:bool"]],
+        ["baseline", 18, ["type:auto","type:length"]],
+        ["size", 18, ["type:auto","type:length"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "super": [
+        ["typographic", 18, ["type:bool"]],
+        ["baseline", 18, ["type:auto","type:length"]],
+        ["size", 18, ["type:auto","type:length"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "underline": [
+        ["stroke", 18, ["type:auto","type:color","type:dictionary","type:gradient","type:length","type:stroke","type:tiling"]],
+        ["offset", 18, ["type:auto","type:length"]],
+        ["extent", 18, ["type:length"]],
+        ["evade", 18, ["type:bool"]],
+        ["background", 18, ["type:bool"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "overline": [
+        ["stroke", 18, ["type:auto","type:color","type:dictionary","type:gradient","type:length","type:stroke","type:tiling"]],
+        ["offset", 18, ["type:auto","type:length"]],
+        ["extent", 18, ["type:length"]],
+        ["evade", 18, ["type:bool"]],
+        ["background", 18, ["type:bool"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "strike": [
+        ["stroke", 18, ["type:auto","type:color","type:dictionary","type:gradient","type:length","type:stroke","type:tiling"]],
+        ["offset", 18, ["type:auto","type:length"]],
+        ["extent", 18, ["type:length"]],
+        ["background", 18, ["type:bool"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "highlight": [
+        ["fill", 18, ["type:color","type:gradient","type:none","type:tiling"]],
+        ["stroke", 18, ["type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["top-edge", 18, ["type:length","value:\"ascender\"","value:\"baseline\"","value:\"bounds\"","value:\"cap-height\"","value:\"x-height\""]],
+        ["bottom-edge", 18, ["type:length","value:\"baseline\"","value:\"bounds\"","value:\"descender\""]],
+        ["extent", 18, ["type:length"]],
+        ["radius", 18, ["type:dictionary","type:relative"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "smallcaps": [
+        ["all", 18, ["type:bool"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "raw": [
+        ["text", 9, ["type:str"]],
+        ["block", 18, ["type:bool"]],
+        ["lang", 18, ["type:none","type:str"]],
+        ["align", 18, ["type:alignment"]],
+        ["syntaxes", 18, ["type:array","type:bytes","type:path","type:str"]],
+        ["theme", 18, ["type:auto","type:bytes","type:none","type:path","type:str"]],
+        ["tab-size", 18, ["type:int"]],
+    ],
+    "lower": [
+        ["text", 9, ["type:content","type:str"]],
+    ],
+    "upper": [
+        ["text", 9, ["type:content","type:str"]],
+    ],
+    "lorem": [
+        ["words", 9, ["type:int"]],
+    ],
+    "page": [
+        ["paper", 2, ["value:\"a0\"","value:\"a1\"","value:\"a10\"","value:\"a11\"","value:\"a2\"","value:\"a3\"","value:\"a4\"","value:\"a5\"","value:\"a6\"","value:\"a7\"","value:\"a8\"","value:\"a9\"","value:\"ansi-a\"","value:\"ansi-b\"","value:\"ansi-c\"","value:\"ansi-d\"","value:\"ansi-e\"","value:\"arch-a\"","value:\"arch-b\"","value:\"arch-c\"","value:\"arch-d\"","value:\"arch-e\"","value:\"arch-e1\"","value:\"asia-f4\"","value:\"cn-business-card\"","value:\"din-d3\"","value:\"din-d4\"","value:\"din-d5\"","value:\"din-d6\"","value:\"din-d7\"","value:\"din-d8\"","value:\"eu-business-card\"","value:\"fr-carré\"","value:\"fr-couronne-écriture\"","value:\"fr-couronne-édition\"","value:\"fr-jésus\"","value:\"fr-raisin\"","value:\"fr-tellière\"","value:\"iso-b1\"","value:\"iso-b2\"","value:\"iso-b3\"","value:\"iso-b4\"","value:\"iso-b5\"","value:\"iso-b6\"","value:\"iso-b7\"","value:\"iso-b8\"","value:\"iso-c3\"","value:\"iso-c4\"","value:\"iso-c5\"","value:\"iso-c6\"","value:\"iso-c7\"","value:\"iso-c8\"","value:\"iso-id-1\"","value:\"iso-id-2\"","value:\"iso-id-3\"","value:\"jis-b0\"","value:\"jis-b1\"","value:\"jis-b10\"","value:\"jis-b11\"","value:\"jis-b2\"","value:\"jis-b3\"","value:\"jis-b4\"","value:\"jis-b5\"","value:\"jis-b6\"","value:\"jis-b7\"","value:\"jis-b8\"","value:\"jis-b9\"","value:\"jp-business-card\"","value:\"jp-kiku-4\"","value:\"jp-kiku-5\"","value:\"jp-shiroku-ban-4\"","value:\"jp-shiroku-ban-5\"","value:\"jp-shiroku-ban-6\"","value:\"newspaper-berliner\"","value:\"newspaper-broadsheet\"","value:\"newspaper-compact\"","value:\"presentation-16-9\"","value:\"presentation-4-3\"","value:\"sac-d0\"","value:\"sac-d1\"","value:\"sac-d2\"","value:\"sac-d3\"","value:\"sac-d4\"","value:\"sac-d5\"","value:\"sac-d6\"","value:\"sis-e5\"","value:\"sis-g5\"","value:\"uk-book-a\"","value:\"uk-book-b\"","value:\"uk-brief\"","value:\"uk-crown\"","value:\"uk-draft\"","value:\"uk-foolscap\"","value:\"uk-quarto\"","value:\"us-business-card\"","value:\"us-digest\"","value:\"us-executive\"","value:\"us-foolscap-folio\"","value:\"us-gov-legal\"","value:\"us-gov-letter\"","value:\"us-ledger\"","value:\"us-legal\"","value:\"us-letter\"","value:\"us-oficio\"","value:\"us-statement\"","value:\"us-tabloid\"","value:\"us-trade\""]],
+        ["width", 18, ["type:auto","type:length"]],
+        ["height", 18, ["type:auto","type:length"]],
+        ["flipped", 18, ["type:bool"]],
+        ["margin", 18, ["type:auto","type:dictionary","type:relative"]],
+        ["bleed", 18, ["type:dictionary","type:relative"]],
+        ["binding", 18, ["type:alignment","type:auto"]],
+        ["columns", 18, ["type:int"]],
+        ["fill", 18, ["type:auto","type:color","type:gradient","type:none","type:tiling"]],
+        ["numbering", 18, ["type:function","type:none","type:str"]],
+        ["supplement", 18, ["type:auto","type:content","type:none"]],
+        ["number-align", 18, ["type:alignment"]],
+        ["header", 18, ["type:auto","type:content","type:none"]],
+        ["header-ascent", 18, ["type:relative"]],
+        ["footer", 18, ["type:auto","type:content","type:none"]],
+        ["footer-descent", 18, ["type:relative"]],
+        ["background", 18, ["type:content","type:none"]],
+        ["foreground", 18, ["type:content","type:none"]],
+        ["body", 2, ["type:content"]],
+    ],
+    "pagebreak": [
+        ["weak", 18, ["type:bool"]],
+        ["to", 18, ["type:none","value:\"even\"","value:\"odd\""]],
+    ],
+    "v": [
+        ["amount", 9, ["type:fraction","type:relative"]],
+        ["weak", 18, ["type:bool"]],
+    ],
+    "h": [
+        ["amount", 9, ["type:fraction","type:relative"]],
+        ["weak", 18, ["type:bool"]],
+    ],
+    "box": [
+        ["width", 18, ["type:auto","type:fraction","type:relative"]],
+        ["height", 18, ["type:auto","type:relative"]],
+        ["baseline", 18, ["type:alignment","type:auto","type:dictionary","type:relative"]],
+        ["fill", 18, ["type:color","type:gradient","type:none","type:tiling"]],
+        ["stroke", 18, ["type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["radius", 18, ["type:dictionary","type:relative"]],
+        ["inset", 18, ["type:dictionary","type:relative"]],
+        ["outset", 18, ["type:dictionary","type:relative"]],
+        ["clip", 18, ["type:bool"]],
+        ["body", 17, ["type:content","type:none"]],
+    ],
+    "block": [
+        ["width", 18, ["type:auto","type:relative"]],
+        ["height", 18, ["type:auto","type:fraction","type:relative"]],
+        ["breakable", 18, ["type:bool"]],
+        ["fill", 18, ["type:color","type:gradient","type:none","type:tiling"]],
+        ["stroke", 18, ["type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["radius", 18, ["type:dictionary","type:relative"]],
+        ["inset", 18, ["type:dictionary","type:relative"]],
+        ["outset", 18, ["type:dictionary","type:relative"]],
+        ["spacing", 2, ["type:auto","type:fraction","type:relative"]],
+        ["above", 18, ["type:auto","type:fraction","type:relative"]],
+        ["below", 18, ["type:auto","type:fraction","type:relative"]],
+        ["clip", 18, ["type:bool"]],
+        ["sticky", 18, ["type:bool"]],
+        ["body", 17, ["type:content","type:none"]],
+    ],
+    "stack": [
+        ["dir", 18, ["type:direction"]],
+        ["spacing", 18, ["type:fraction","type:none","type:relative"]],
+        ["children", 13, ["type:content","type:fraction","type:relative"]],
+    ],
+    "grid": [
+        ["columns", 18, ["type:array","type:auto","type:fraction","type:int","type:relative"]],
+        ["rows", 18, ["type:array","type:auto","type:fraction","type:int","type:relative"]],
+        ["gutter", 2, ["type:array","type:auto","type:fraction","type:int","type:relative"]],
+        ["column-gutter", 18, ["type:array","type:auto","type:fraction","type:int","type:relative"]],
+        ["row-gutter", 18, ["type:array","type:auto","type:fraction","type:int","type:relative"]],
+        ["inset", 18, ["type:array","type:dictionary","type:function","type:relative"]],
+        ["align", 18, ["type:alignment","type:array","type:auto","type:function"]],
+        ["fill", 18, ["type:array","type:color","type:function","type:gradient","type:none","type:tiling"]],
+        ["stroke", 18, ["type:array","type:color","type:dictionary","type:function","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["children", 13, ["type:content"]],
+    ],
+    "columns": [
+        ["count", 17, ["type:int"]],
+        ["gutter", 18, ["type:relative"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "colbreak": [
+        ["weak", 18, ["type:bool"]],
+    ],
+    "place": [
+        ["alignment", 17, ["type:alignment","type:auto"]],
+        ["scope", 18, ["value:\"column\"","value:\"parent\""]],
+        ["float", 18, ["type:bool"]],
+        ["clearance", 18, ["type:length"]],
+        ["dx", 18, ["type:relative"]],
+        ["dy", 18, ["type:relative"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "align": [
+        ["alignment", 17, ["type:alignment"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "pad": [
+        ["left", 18, ["type:relative"]],
+        ["top", 18, ["type:relative"]],
+        ["right", 18, ["type:relative"]],
+        ["bottom", 18, ["type:relative"]],
+        ["x", 2, ["type:relative"]],
+        ["y", 2, ["type:relative"]],
+        ["rest", 2, ["type:relative"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "repeat": [
+        ["body", 9, ["type:content"]],
+        ["gap", 18, ["type:length"]],
+        ["justify", 18, ["type:bool"]],
+    ],
+    "move": [
+        ["dx", 18, ["type:relative"]],
+        ["dy", 18, ["type:relative"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "scale": [
+        ["factor", 2, ["type:auto","type:length","type:ratio"]],
+        ["x", 18, ["type:auto","type:length","type:ratio"]],
+        ["y", 18, ["type:auto","type:length","type:ratio"]],
+        ["origin", 18, ["type:alignment"]],
+        ["reflow", 18, ["type:bool"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "rotate": [
+        ["angle", 17, ["type:angle"]],
+        ["origin", 18, ["type:alignment"]],
+        ["reflow", 18, ["type:bool"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "skew": [
+        ["ax", 18, ["type:angle"]],
+        ["ay", 18, ["type:angle"]],
+        ["origin", 18, ["type:alignment"]],
+        ["reflow", 18, ["type:bool"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "hide": [
+        ["body", 9, ["type:content"]],
+    ],
+    "measure": [
+        ["width", 2, ["type:auto","type:length"]],
+        ["height", 2, ["type:auto","type:length"]],
+        ["content", 9, ["type:content"]],
+    ],
+    "layout": [
+        ["func", 9, ["type:function"]],
+    ],
+    "tiling": [
+        ["size", 2, ["type:array","type:auto"]],
+        ["spacing", 2, ["type:array"]],
+        ["offset", 2, ["type:array"]],
+        ["relative", 2, ["type:auto","value:\"parent\"","value:\"self\""]],
+        ["body", 9, ["type:content"]],
+    ],
+    "stroke": [
+        ["paint", 9, ["type:auto","type:color","type:gradient","type:tiling"]],
+        ["thickness", 9, ["type:auto","type:length"]],
+        ["cap", 9, ["type:auto","value:\"butt\"","value:\"round\"","value:\"square\""]],
+        ["join", 9, ["type:auto","value:\"bevel\"","value:\"miter\"","value:\"round\""]],
+        ["dash", 9, ["type:array","type:auto","type:dictionary","type:none","value:\"dash-dotted\"","value:\"dashed\"","value:\"densely-dash-dotted\"","value:\"densely-dashed\"","value:\"densely-dotted\"","value:\"dotted\"","value:\"loosely-dash-dotted\"","value:\"loosely-dashed\"","value:\"loosely-dotted\"","value:\"solid\""]],
+        ["miter-limit", 9, ["type:auto","type:float"]],
+    ],
+    "image": [
+        ["source", 9, ["type:bytes","type:path","type:str"]],
+        ["format", 18, ["type:auto","type:dictionary","value:\"gif\"","value:\"jpg\"","value:\"pdf\"","value:\"png\"","value:\"svg\"","value:\"webp\""]],
+        ["width", 18, ["type:auto","type:relative"]],
+        ["height", 18, ["type:auto","type:fraction","type:relative"]],
+        ["alt", 18, ["type:none","type:str"]],
+        ["page", 18, ["type:int"]],
+        ["fit", 18, ["value:\"contain\"","value:\"cover\"","value:\"stretch\""]],
+        ["scaling", 18, ["type:auto","value:\"pixelated\"","value:\"smooth\""]],
+        ["icc", 18, ["type:auto","type:bytes","type:path","type:str"]],
+    ],
+    "line": [
+        ["start", 18, ["type:array"]],
+        ["end", 18, ["type:array","type:none"]],
+        ["length", 18, ["type:relative"]],
+        ["angle", 18, ["type:angle"]],
+        ["stroke", 18, ["type:color","type:dictionary","type:gradient","type:length","type:stroke","type:tiling"]],
+    ],
+    "rect": [
+        ["width", 18, ["type:auto","type:relative"]],
+        ["height", 18, ["type:auto","type:fraction","type:relative"]],
+        ["fill", 18, ["type:color","type:gradient","type:none","type:tiling"]],
+        ["stroke", 18, ["type:auto","type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["radius", 18, ["type:dictionary","type:relative"]],
+        ["inset", 18, ["type:dictionary","type:relative"]],
+        ["outset", 18, ["type:dictionary","type:relative"]],
+        ["body", 17, ["type:content","type:none"]],
+    ],
+    "square": [
+        ["size", 2, ["type:auto","type:length"]],
+        ["width", 18, ["type:auto","type:relative"]],
+        ["height", 18, ["type:auto","type:fraction","type:relative"]],
+        ["fill", 18, ["type:color","type:gradient","type:none","type:tiling"]],
+        ["stroke", 18, ["type:auto","type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["radius", 18, ["type:dictionary","type:relative"]],
+        ["inset", 18, ["type:dictionary","type:relative"]],
+        ["outset", 18, ["type:dictionary","type:relative"]],
+        ["body", 17, ["type:content","type:none"]],
+    ],
+    "ellipse": [
+        ["width", 18, ["type:auto","type:relative"]],
+        ["height", 18, ["type:auto","type:fraction","type:relative"]],
+        ["fill", 18, ["type:color","type:gradient","type:none","type:tiling"]],
+        ["stroke", 18, ["type:auto","type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["inset", 18, ["type:dictionary","type:relative"]],
+        ["outset", 18, ["type:dictionary","type:relative"]],
+        ["body", 17, ["type:content","type:none"]],
+    ],
+    "circle": [
+        ["radius", 2, ["type:length"]],
+        ["width", 18, ["type:auto","type:relative"]],
+        ["height", 18, ["type:auto","type:fraction","type:relative"]],
+        ["fill", 18, ["type:color","type:gradient","type:none","type:tiling"]],
+        ["stroke", 18, ["type:auto","type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["inset", 18, ["type:dictionary","type:relative"]],
+        ["outset", 18, ["type:dictionary","type:relative"]],
+        ["body", 17, ["type:content","type:none"]],
+    ],
+    "polygon": [
+        ["fill", 18, ["type:color","type:gradient","type:none","type:tiling"]],
+        ["fill-rule", 18, ["value:\"even-odd\"","value:\"non-zero\""]],
+        ["stroke", 18, ["type:auto","type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["vertices", 13, ["type:array"]],
+    ],
+    "curve": [
+        ["fill", 18, ["type:color","type:gradient","type:none","type:tiling"]],
+        ["fill-rule", 18, ["value:\"even-odd\"","value:\"non-zero\""]],
+        ["stroke", 18, ["type:auto","type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["components", 13, ["type:content"]],
+    ],
+    "counter": [
+        ["key", 9, ["type:function","type:label","type:location","type:selector","type:str"]],
+    ],
+    "state": [
+        ["key", 9, ["type:str"]],
+        ["init", 1, ["any"]],
+    ],
+    "metadata": [
+        ["value", 9, ["any"]],
+    ],
+    "query": [
+        ["target", 9, ["type:function","type:label","type:location","type:selector"]],
+    ],
+    "locate": [
+        ["selector", 9, ["type:function","type:label","type:location","type:selector"]],
+    ],
+    "read": [
+        ["path", 9, ["type:path","type:str"]],
+        ["encoding", 2, ["type:none","value:\"utf8\""]],
+    ],
+    "csv": [
+        ["source", 9, ["type:bytes","type:path","type:str"]],
+        ["delimiter", 2, ["type:str"]],
+        ["row-type", 2, ["type:type"]],
+    ],
+    "json": [
+        ["source", 9, ["type:bytes","type:path","type:str"]],
+    ],
+    "toml": [
+        ["source", 9, ["type:bytes","type:path","type:str"]],
+    ],
+    "yaml": [
+        ["source", 9, ["type:bytes","type:path","type:str"]],
+    ],
+    "cbor": [
+        ["source", 9, ["type:bytes","type:path","type:str"]],
+    ],
+    "xml": [
+        ["source", 9, ["type:bytes","type:path","type:str"]],
+    ],
+    "math.equation": [
+        ["block", 18, ["type:bool"]],
+        ["numbering", 18, ["type:function","type:none","type:str"]],
+        ["number-align", 18, ["type:alignment"]],
+        ["supplement", 18, ["type:auto","type:content","type:function","type:none"]],
+        ["alt", 18, ["type:none","type:str"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "math.text": [
+        ["font", 18, ["type:array","type:dictionary","type:str"]],
+        ["fallback", 18, ["type:bool"]],
+        ["style", 18, ["value:\"italic\"","value:\"normal\"","value:\"oblique\""]],
+        ["weight", 18, ["type:int","value:\"black\"","value:\"bold\"","value:\"extrabold\"","value:\"extralight\"","value:\"light\"","value:\"medium\"","value:\"regular\"","value:\"semibold\"","value:\"thin\""]],
+        ["stretch", 18, ["type:ratio"]],
+        ["size", 18, ["type:length"]],
+        ["fill", 18, ["type:color","type:gradient","type:tiling"]],
+        ["stroke", 18, ["type:color","type:dictionary","type:gradient","type:length","type:none","type:stroke","type:tiling"]],
+        ["tracking", 18, ["type:length"]],
+        ["spacing", 18, ["type:relative"]],
+        ["cjk-latin-spacing", 18, ["type:auto","type:none"]],
+        ["baseline", 18, ["type:length"]],
+        ["overhang", 18, ["type:bool"]],
+        ["top-edge", 18, ["type:length","value:\"ascender\"","value:\"baseline\"","value:\"bounds\"","value:\"cap-height\"","value:\"x-height\""]],
+        ["bottom-edge", 18, ["type:length","value:\"baseline\"","value:\"bounds\"","value:\"descender\""]],
+        ["lang", 18, ["type:str"]],
+        ["region", 18, ["type:none","type:str"]],
+        ["script", 18, ["type:auto","type:str"]],
+        ["dir", 18, ["type:auto","type:direction"]],
+        ["hyphenate", 18, ["type:auto","type:bool"]],
+        ["costs", 18, ["type:dictionary"]],
+        ["kerning", 18, ["type:bool"]],
+        ["alternates", 18, ["type:bool","type:int"]],
+        ["stylistic-set", 18, ["type:array","type:int","type:none"]],
+        ["ligatures", 18, ["type:bool"]],
+        ["discretionary-ligatures", 18, ["type:bool"]],
+        ["historical-ligatures", 18, ["type:bool"]],
+        ["number-type", 18, ["type:auto","value:\"lining\"","value:\"old-style\""]],
+        ["number-width", 18, ["type:auto","value:\"proportional\"","value:\"tabular\""]],
+        ["slashed-zero", 18, ["type:bool"]],
+        ["fractions", 18, ["type:bool"]],
+        ["features", 18, ["type:array","type:dictionary"]],
+        ["variations", 18, ["type:dictionary"]],
+        ["body", 2, ["type:content"]],
+        ["text", 9, ["type:str"]],
+    ],
+    "math.lr": [
+        ["size", 18, ["type:relative"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "math.mid": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.attach": [
+        ["base", 9, ["type:content"]],
+        ["t", 18, ["type:content","type:none"]],
+        ["b", 18, ["type:content","type:none"]],
+        ["tl", 18, ["type:content","type:none"]],
+        ["bl", 18, ["type:content","type:none"]],
+        ["tr", 18, ["type:content","type:none"]],
+        ["br", 18, ["type:content","type:none"]],
+    ],
+    "math.stretch": [
+        ["body", 9, ["type:content"]],
+        ["size", 18, ["type:relative"]],
+    ],
+    "math.scripts": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.limits": [
+        ["body", 9, ["type:content"]],
+        ["inline", 18, ["type:bool"]],
+    ],
+    "math.accent": [
+        ["base", 9, ["type:content"]],
+        ["accent", 9, ["type:content","type:str"]],
+        ["size", 18, ["type:relative"]],
+        ["dotless", 18, ["type:bool"]],
+    ],
+    "math.underline": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.overline": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.underbrace": [
+        ["body", 9, ["type:content"]],
+        ["annotation", 17, ["type:content","type:none"]],
+    ],
+    "math.overbrace": [
+        ["body", 9, ["type:content"]],
+        ["annotation", 17, ["type:content","type:none"]],
+    ],
+    "math.underbracket": [
+        ["body", 9, ["type:content"]],
+        ["annotation", 17, ["type:content","type:none"]],
+    ],
+    "math.overbracket": [
+        ["body", 9, ["type:content"]],
+        ["annotation", 17, ["type:content","type:none"]],
+    ],
+    "math.underparen": [
+        ["body", 9, ["type:content"]],
+        ["annotation", 17, ["type:content","type:none"]],
+    ],
+    "math.overparen": [
+        ["body", 9, ["type:content"]],
+        ["annotation", 17, ["type:content","type:none"]],
+    ],
+    "math.undershell": [
+        ["body", 9, ["type:content"]],
+        ["annotation", 17, ["type:content","type:none"]],
+    ],
+    "math.overshell": [
+        ["body", 9, ["type:content"]],
+        ["annotation", 17, ["type:content","type:none"]],
+    ],
+    "math.cancel": [
+        ["body", 9, ["type:content"]],
+        ["length", 18, ["type:relative"]],
+        ["inverted", 18, ["type:bool"]],
+        ["cross", 18, ["type:bool"]],
+        ["angle", 18, ["type:angle","type:auto","type:function"]],
+        ["stroke", 18, ["type:color","type:dictionary","type:gradient","type:length","type:stroke","type:tiling"]],
+    ],
+    "math.frac": [
+        ["num", 9, ["type:content"]],
+        ["denom", 9, ["type:content"]],
+        ["style", 18, ["value:\"horizontal\"","value:\"skewed\"","value:\"vertical\""]],
+    ],
+    "math.binom": [
+        ["upper", 9, ["type:content"]],
+        ["lower", 13, ["type:content"]],
+    ],
+    "math.vec": [
+        ["delim", 18, ["type:array","type:none","type:str","type:symbol"]],
+        ["align", 18, ["type:alignment"]],
+        ["gap", 18, ["type:relative"]],
+        ["children", 13, ["type:content"]],
+    ],
+    "math.mat": [
+        ["delim", 18, ["type:array","type:none","type:str","type:symbol"]],
+        ["align", 18, ["type:alignment"]],
+        ["augment", 18, ["type:dictionary","type:int","type:none"]],
+        ["gap", 2, ["type:relative"]],
+        ["row-gap", 18, ["type:relative"]],
+        ["column-gap", 18, ["type:relative"]],
+        ["rows", 13, ["type:array"]],
+    ],
+    "math.cases": [
+        ["delim", 18, ["type:array","type:none","type:str","type:symbol"]],
+        ["reverse", 18, ["type:bool"]],
+        ["gap", 18, ["type:relative"]],
+        ["children", 13, ["type:content"]],
+    ],
+    "math.root": [
+        ["index", 17, ["type:content","type:none"]],
+        ["radicand", 9, ["type:content"]],
+    ],
+    "math.class": [
+        ["class", 9, ["value:\"binary\"","value:\"closing\"","value:\"fence\"","value:\"large\"","value:\"normal\"","value:\"opening\"","value:\"punctuation\"","value:\"relation\"","value:\"unary\"","value:\"vary\""]],
+        ["body", 9, ["type:content"]],
+    ],
+    "math.op": [
+        ["text", 9, ["type:content"]],
+        ["limits", 18, ["type:bool"]],
+    ],
+    "math.primes": [
+        ["count", 9, ["type:int"]],
+    ],
+    "math.abs": [
+        ["size", 2, ["type:relative"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "math.norm": [
+        ["size", 2, ["type:relative"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "math.round": [
+        ["size", 2, ["type:relative"]],
+        ["body", 9, ["type:content"]],
+    ],
+    "math.sqrt": [
+        ["radicand", 9, ["type:content"]],
+    ],
+    "math.upright": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.bold": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.italic": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.serif": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.sans": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.scr": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.cal": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.frak": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.mono": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.bb": [
+        ["body", 9, ["type:content"]],
+    ],
+    "math.display": [
+        ["body", 9, ["type:content"]],
+        ["cramped", 2, ["type:bool"]],
+    ],
+    "math.inline": [
+        ["body", 9, ["type:content"]],
+        ["cramped", 2, ["type:bool"]],
+    ],
+    "math.script": [
+        ["body", 9, ["type:content"]],
+        ["cramped", 2, ["type:bool"]],
+    ],
+    "math.sscript": [
+        ["body", 9, ["type:content"]],
+        ["cramped", 2, ["type:bool"]],
+    ],
+    "pdf.attach": [
+        ["path", 9, ["type:path","type:str"]],
+        ["data", 9, ["type:bytes"]],
+        ["relationship", 18, ["type:none","value:\"alternative\"","value:\"data\"","value:\"source\"","value:\"supplement\""]],
+        ["mime-type", 18, ["type:none","type:str"]],
+        ["description", 18, ["type:none","type:str"]],
+    ],
+    "pdf.artifact": [
+        ["kind", 18, ["value:\"background\"","value:\"bates\"","value:\"footer\"","value:\"header\"","value:\"layout\"","value:\"line-number\"","value:\"other\"","value:\"page\"","value:\"page-number\"","value:\"pagination-other\"","value:\"redaction\"","value:\"watermark\""]],
+        ["body", 9, ["type:content"]],
+    ],
+    "luma": [
+        ["lightness", 9, ["type:int","type:ratio"]],
+        ["alpha", 9, ["type:ratio"]],
+        ["color", 9, ["type:color"]],
+    ],
+    "oklab": [
+        ["lightness", 9, ["type:ratio"]],
+        ["a", 9, ["type:float","type:ratio"]],
+        ["b", 9, ["type:float","type:ratio"]],
+        ["alpha", 9, ["type:ratio"]],
+        ["color", 9, ["type:color"]],
+    ],
+    "oklch": [
+        ["lightness", 9, ["type:ratio"]],
+        ["chroma", 9, ["type:float","type:ratio"]],
+        ["hue", 9, ["type:angle"]],
+        ["alpha", 9, ["type:ratio"]],
+        ["color", 9, ["type:color"]],
+    ],
+    "rgb": [
+        ["red", 9, ["type:int","type:ratio"]],
+        ["green", 9, ["type:int","type:ratio"]],
+        ["blue", 9, ["type:int","type:ratio"]],
+        ["alpha", 9, ["type:int","type:ratio"]],
+        ["hex", 9, ["type:str"]],
+        ["color", 9, ["type:color"]],
+    ],
+    "cmyk": [
+        ["cyan", 9, ["type:ratio"]],
+        ["magenta", 9, ["type:ratio"]],
+        ["yellow", 9, ["type:ratio"]],
+        ["key", 9, ["type:ratio"]],
+        ["color", 9, ["type:color"]],
+    ],
+    "range": [
+        ["start", 1, ["type:int"]],
+        ["end", 9, ["type:int"]],
+        ["inclusive", 2, ["type:bool"]],
+        ["step", 2, ["type:int"]],
+    ],
+}

@@ -1,7 +1,7 @@
 import ist from "ist"
 import {CompletionContext} from "@codemirror/autocomplete"
 import {EditorState} from "@codemirror/state"
-import {typst_lezer} from "../dist/lezer.js"
+import {typstBuiltinSignatures, typst_lezer} from "../dist/lezer.js"
 
 async function complete(doc, pos = doc.length, explicit = false) {
     const state = EditorState.create({doc, extensions: [typst_lezer()]})
@@ -76,6 +76,70 @@ describe("Typst Lezer autocomplete", () => {
 
         const sys = await complete("#sys.ver")
         ist(option(sys, "version").type, "property")
+    })
+
+    it("completes built-in function parameter names", async () => {
+        const result = await complete("#strike(")
+        ist(result.from, 8)
+        for (const name of ["stroke", "offset", "extent", "background"]) {
+            ist(option(result, name).type, "property")
+            ist(option(result, name).apply, `${name}: `)
+        }
+        ist(option(result, "body"), undefined)
+    })
+
+    it("offers values for the first configurable parameter", async () => {
+        const result = await complete("#strike(")
+        for (const color of ["black", "blue", "red"]) {
+            ist(option(result, color).type, "constant")
+        }
+        for (const value of ["auto", "1pt", "gradient", "tiling", "dictionary"]) {
+            ist(!!option(result, value), true)
+        }
+    })
+
+    it("uses the named parameter's accepted types", async () => {
+        const stroke = await complete("#strike(stroke: re")
+        ist(stroke.from, 16)
+        ist(option(stroke, "red").type, "constant")
+        ist(!!option(stroke, "auto"), true)
+        ist(!!option(stroke, "1pt"), true)
+        ist(!!option(stroke, "gradient"), true)
+        ist(option(stroke, "true"), undefined)
+
+        const offset = await complete("#strike(offset: ")
+        ist(!!option(offset, "auto"), true)
+        ist(!!option(offset, "1pt"), true)
+        ist(option(offset, "red"), undefined)
+
+        const background = await complete("#strike(background: ")
+        ist(option(background, "true").type, "constant")
+        ist(option(background, "false").type, "constant")
+        ist(option(background, "red"), undefined)
+    })
+
+    it("completes literal enums and set-rule parameters", async () => {
+        const style = await complete('#text(style: "i')
+        ist(style.from, 13)
+        ist(option(style, '"italic"').type, "enum")
+        ist(option(style, '"normal"').type, "enum")
+
+        const fill = await complete("#set text(fill: ")
+        ist(option(fill, "red").type, "constant")
+        ist(!!option(fill, "gradient"), true)
+    })
+
+    it("does not repeat named parameters already supplied", async () => {
+        const result = await complete("#strike(stroke: red, ")
+        ist(option(result, "stroke"), undefined)
+        ist(option(result, "offset").type, "property")
+    })
+
+    it("publishes Typst's reflected built-in signature metadata", () => {
+        const strike = typstBuiltinSignatures.strike
+        ist(strike.find(parameter => parameter[0] === "stroke")[2].includes("type:color"), true)
+        ist(strike.find(parameter => parameter[0] === "background")[2].includes("type:bool"), true)
+        ist(typstBuiltinSignatures["calc.sin"][0][0], "angle")
     })
 
     it("supports code blocks and explicit completion at an empty expression", async () => {

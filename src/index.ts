@@ -4,6 +4,7 @@ export * from "./typst"
 export * from "./parser"
 export {
     typst_lezer,
+    typstBuiltinSignatures,
     typstCompletionSource,
     typstGlobalCompletions,
     typstLezerHighlighting,
