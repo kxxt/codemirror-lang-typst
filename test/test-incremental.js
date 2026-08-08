@@ -1,7 +1,7 @@
 import ist from "ist"
 import {EditorState} from "@codemirror/state"
 import {ensureSyntaxTree} from "@codemirror/language"
-import {patchHighlights, typst} from "../dist/index.js"
+import {patchHighlights, typst, typst_lezer} from "../dist/index.js"
 import {TypstWasmParser} from "../wasm/typst_syntax.js"
 
 function applyEdits(doc, edits) {
@@ -141,14 +141,25 @@ describe("Typst incremental highlighting", () => {
         }
     })
 
-    it("keeps CodeMirror's Lezer tree as an O(1) placeholder", () => {
+    it("exposes the parsed Typst tree through typst_lezer", () => {
         const editorState = EditorState.create({
-            doc: "= Heading\n" + "text\n".repeat(10_000),
-            extensions: [typst()],
+            doc: "= Heading\n#let value = 1\n$ x^2 $\n",
+            extensions: [typst_lezer()],
         })
         const tree = ensureSyntaxTree(editorState, editorState.doc.length, 1e9)
         ist(tree.type.name, "Typst")
         ist(tree.length, editorState.doc.length)
+        ist(tree.toString().includes("Heading"), true)
+        ist(tree.toString().includes("LetBinding"), true)
+        ist(tree.toString().includes("Equation"), true)
+    })
+
+    it("keeps typst() on the legacy placeholder parser", () => {
+        const doc = "= Heading\n" + "text\n".repeat(10_000)
+        const editorState = EditorState.create({doc, extensions: [typst()]})
+        const tree = ensureSyntaxTree(editorState, editorState.doc.length, 1e9)
+        ist(tree.type.name, "Typst")
+        ist(tree.length, doc.length)
         ist(tree.children.length, 0)
     })
 })

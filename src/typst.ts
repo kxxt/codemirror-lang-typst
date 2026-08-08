@@ -29,9 +29,8 @@ export class TypstParseContext implements PartialParse {
 }
 
 /**
- * A lightweight placeholder parser used only to register Typst as a
- * CodeMirror language. Syntax highlighting is provided separately by the
- * incremental Typst WASM highlighter below.
+ * A placeholder parser used by `typst()` alongside the WASM
+ * highlighter.
  */
 export class TypstParser extends Parser {
     readonly nodeSet: NodeSet

@@ -1,0 +1,71 @@
+import {
+    Language,
+    LanguageSupport,
+    defaultHighlightStyle,
+    languageDataProp,
+    syntaxHighlighting,
+} from "@codemirror/language"
+import {styleTags, tags} from "@lezer/highlight"
+import {TypstHighlightSytle, typstLanguageData} from "./config"
+import {typstTags} from "./highlight"
+import {TypstLezerParser} from "./parser"
+
+/**
+ * Lezer highlight metadata for the Typst concrete syntax tree.
+ *
+ * This deliberately contains no dependency on the WASM highlighter. The
+ * selectors mirror `typst-syntax`'s highlight categories where those can be
+ * represented through Lezer node props.
+ */
+export const typstLezerHighlighting = styleTags({
+    "Shebang LineComment BlockComment": tags.comment,
+    Error: tags.invalid,
+
+    "Linebreak Escape Shorthand MathShorthand": tags.escape,
+    "Strong/... Strong/Star": tags.strong,
+    "Emph/... Emph/Underscore": tags.emphasis,
+    "Raw/...": tags.monospace,
+    Link: tags.link,
+    Label: tags.escape,
+    "Ref/...": tags.escape,
+    "Heading/...": tags.heading,
+    "ListMarker EnumMarker TermMarker": typstTags.listMarker,
+
+    Dollar: typstTags.mathDelimiter,
+    "MathAlignPoint MathPrimes Root MathAttach/Underscore MathAttach/Hat MathFrac/Slash": tags.escape,
+    "Math/LeftParen Math/RightParen": tags.paren,
+    MathIdent: typstTags.interpolated,
+
+    "Not And Or None Auto Let Set Show Context If Else For In While Break Continue Return Import Include As": tags.keyword,
+    Bool: tags.bool,
+    "Int Float Numeric": tags.number,
+    Str: tags.string,
+
+    "FuncCall/Ident MathCall/MathIdent SetRule/Ident ShowRule/Ident": tags.function(tags.variableName),
+    "FieldAccess/Ident": tags.propertyName,
+    Hash: typstTags.interpolated,
+
+    "LeftBrace RightBrace LeftBracket RightBracket LeftParen RightParen Comma Semicolon Colon Dot": tags.punctuation,
+    "Star Plus Minus Slash Eq EqEq ExclEq Lt LtEq Gt GtEq PlusEq HyphEq StarEq SlashEq Dots Arrow": tags.operator,
+})
+
+/**
+ * Typst language support backed entirely by the native Lezer parser.
+ *
+ * Import this from `codemirror-lang-typst/lezer` when the application should
+ * not load or bundle the Typst WASM parser.
+ */
+export function typst_lezer(): LanguageSupport {
+    const parser = new TypstLezerParser(
+        languageDataProp.add(type => type.isTop ? typstLanguageData : undefined),
+        typstLezerHighlighting,
+    )
+    return new LanguageSupport(new Language(typstLanguageData, parser, [], "typst"), [
+        syntaxHighlighting(TypstHighlightSytle),
+        syntaxHighlighting(defaultHighlightStyle),
+    ])
+}
+
+export {TypstHighlightSytle, typstLanguageData} from "./config"
+export * from "./highlight"
+export * from "./parser"
