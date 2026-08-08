@@ -67,4 +67,8 @@ Enter splits list content at the cursor into a sibling item with the appropriate
 marker (or creates an empty sibling at the end). Shift-Enter instead starts an
 indented continuation line without a marker.
 
+Code folding is available for code and content blocks, multiline calls and
+collections, math delimiters, raw blocks, block comments, nested list bodies,
+and heading sections.
+
 Autocomplete is intentionally not registered by the legacy `typst()` support.

@@ -9,6 +9,8 @@ export {
     typstBuiltinSignatures,
     typstCompletionSource,
     typstGlobalCompletions,
+    typstLezerFolding,
+    typstLezerFoldService,
     typstLezerHighlighting,
     typstLezerIndentation,
     typstLezerIndentService,
