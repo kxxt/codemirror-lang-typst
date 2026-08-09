@@ -13,6 +13,7 @@ import {typstLezerFolding, typstLezerFoldService} from "./fold"
 import {typstTags} from "./highlight"
 import {typstLezerIndentation, typstLezerIndentService} from "./indent"
 import {typstLezerListKeymap} from "./list"
+import {typstLezerLinter} from "./lint"
 import {TypstLezerParser} from "./parser"
 
 /** Language data used by the Lezer implementation, including completions. */
@@ -63,7 +64,7 @@ export const typstLezerHighlighting = styleTags({
 
 /**
  * Typst language support backed entirely by the native Lezer parser.
- * Includes syntax highlighting, autocomplete, automatic indentation, and folding.
+ * Includes syntax highlighting, autocomplete, indentation, folding, and linting.
  *
  * Import this from `codemirror-lang-typst/lezer` when the application should
  * not load or bundle the Typst WASM parser.
@@ -81,6 +82,7 @@ export function typst_lezer(): LanguageSupport {
         typstLezerIndentService,
         typstLezerListKeymap,
         typstLezerFoldService,
+        typstLezerLinter,
     ])
 }
 
@@ -91,5 +93,6 @@ export * from "./fold"
 export * from "./highlight"
 export * from "./indent"
 export * from "./list"
+export * from "./lint"
 export * from "./parser"
 export type {TypstBuiltinParameter} from "./signatures"

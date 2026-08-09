@@ -74,6 +74,12 @@ Code folding is available for code and content blocks, multiline calls and
 collections, math delimiters, raw blocks, block comments, nested list bodies,
 and heading sections.
 
+`typst_lezer()` also enables WASM-free syntax linting for malformed tokens,
+missing expressions and separators, unclosed delimiters, raw blocks, labels,
+links, strings, and nested block comments. Diagnostics appear inline and in
+CodeMirror's lint tooltip. Applications can add `lintGutter()` from
+`@codemirror/lint` when they also want gutter markers.
+
 Autocomplete is intentionally not registered by the legacy `typst()` support.
 
 ## Publishing

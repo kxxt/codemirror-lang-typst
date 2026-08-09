@@ -15,6 +15,9 @@ export {
     typstLezerIndentation,
     typstLezerIndentService,
     typstLezerListKeymap,
+    typstLezerDiagnostics,
+    typstLezerLinter,
+    typstLezerLintSource,
     typstMathCompletions,
     typstSymbolCompletions,
 } from "./lezer"

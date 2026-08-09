@@ -7,6 +7,8 @@ All notable changes to this project are documented in this file.
 ### Added
 
 - Added document-label autocomplete for Typst references after `@`.
+- Added syntax linter to `typst_lezer()` through CodeMirror's
+  lint integration.
 
 ## [0.5.0] - 2026-08-08
 
