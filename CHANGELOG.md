@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-09
+
 ### Added
 
 - Added document-label autocomplete for Typst references after `@`.
@@ -53,5 +55,6 @@ All notable changes to this project are documented in this file.
 - Updated syntax highlighting to follow the official Typst web app's tag
   mapping and light-theme colors.
 
-[Unreleased]: https://github.com/kxxt/codemirror-lang-typst/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/kxxt/codemirror-lang-typst/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/kxxt/codemirror-lang-typst/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/kxxt/codemirror-lang-typst/compare/f6aaca4...v0.5.0
