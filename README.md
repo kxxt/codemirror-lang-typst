@@ -48,6 +48,9 @@ Completions understand built-in field access, including symbol modifiers such
 as `arrow.r`, nested modifiers such as `arrow.r.long`, and namespaces such as
 `sym.arrow`, `math.sqrt`, `calc.sin`, and `sys.version`.
 
+References complete labels declared anywhere in the document. For example,
+typing `@sec` offers a declaration such as `<section:introduction>`.
+
 Built-in calls also complete their parameter names and accepted values. The
 metadata is generated from Typst 0.15's reflected function signatures. For
 example, `strike(` offers `stroke:`, `offset:`, `extent:`, and `background:`,

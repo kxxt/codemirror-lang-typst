@@ -5,7 +5,7 @@ import type {
     CompletionSource,
 } from "@codemirror/autocomplete"
 import {syntaxTree} from "@codemirror/language"
-import type {SyntaxNode} from "@lezer/common"
+import type {SyntaxNode, Tree} from "@lezer/common"
 import {
     typstBuiltinSignatures,
     type TypstBuiltinParameter,
@@ -197,6 +197,70 @@ const codeNodes = new Set([
     "Conditional", "WhileLoop", "ForLoop", "ModuleImport", "ModuleInclude", "FuncCall",
     "Args", "Array", "Dict", "Closure", "Parenthesized", "Unary", "Binary",
 ])
+
+const referenceBlockedNodes = new Set(
+    [...blockedNodes].filter(name => name !== "Ref"),
+)
+const referencePattern = /@[\p{ID_Continue}_:.-]*$/u
+const validReference = /^[\p{ID_Continue}_:.-]*$/u
+const labelCompletionCache = new WeakMap<Tree, readonly Completion[]>()
+
+function documentLabelCompletions(
+    context: CompletionContext,
+    tree: Tree,
+): readonly Completion[] {
+    const cached = labelCompletionCache.get(tree)
+    if (cached) return cached
+
+    const completions: Completion[] = []
+    const seen = new Set<string>()
+    const cursor = tree.cursor()
+    do {
+        if (cursor.name !== "Label") continue
+        const label = context.state.sliceDoc(cursor.from + 1, cursor.to - 1)
+        if (!label || seen.has(label)) continue
+        seen.add(label)
+        completions.push({
+            label,
+            type: "text",
+            detail: "Document label",
+        })
+    } while (cursor.next())
+
+    labelCompletionCache.set(tree, completions)
+    return completions
+}
+
+function referenceCompletion(
+    context: CompletionContext,
+    tree: Tree,
+    node: SyntaxNode,
+): CompletionResult | null | undefined {
+    const reference = context.matchBefore(referencePattern)
+    if (!reference) return undefined
+
+    // Content blocks can be nested in calls and other code nodes. The nearest
+    // mode node determines whether `@` is reference syntax, so stop walking as
+    // soon as markup, code, or math establishes that mode.
+    let markup = true
+    for (let current: SyntaxNode | null = node; current; current = current.parent) {
+        if (referenceBlockedNodes.has(current.name)) return null
+        if (current.name === "Markup" || current.name === "Ref") break
+        if (mathNodes.has(current.name) || codeNodes.has(current.name)) {
+            markup = false
+            break
+        }
+    }
+    if (!markup) return null
+
+    const labelOptions = documentLabelCompletions(context, tree)
+    if (!labelOptions.length) return null
+    return {
+        from: reference.from + 1,
+        options: labelOptions,
+        validFor: validReference,
+    }
+}
 
 function isDefinitionOrKey(node: SyntaxNode): boolean {
     if (node.name !== "Ident" || !node.parent) return false
@@ -813,7 +877,8 @@ function parameterCompletion(
 }
 
 /**
- * CodeMirror completion source for Typst 0.15 built-ins.
+ * CodeMirror completion source for Typst 0.15 built-ins, local bindings, and
+ * document labels.
  *
  * It is registered only by {@link typst_lezer}; the legacy WASM-backed
  * `typst()` support deliberately remains unchanged.
@@ -824,7 +889,11 @@ export const typstCompletionSource: CompletionSource = (
     const word = context.matchBefore(/[\p{ID_Continue}_-]*/u)
     if (!word) return null
 
-    const node = syntaxTree(context.state).resolveInner(context.pos, -1)
+    const tree = syntaxTree(context.state)
+    const node = tree.resolveInner(context.pos, -1)
+    const reference = referenceCompletion(context, tree, node)
+    if (reference !== undefined) return reference
+
     const property = propertyCompletion(context, node, word)
     if (property) return property
 

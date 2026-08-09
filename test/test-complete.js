@@ -209,6 +209,50 @@ describe("Typst Lezer autocomplete", () => {
         ist(option(result, "document").type, "function")
     })
 
+    it("completes document labels after a reference marker", async () => {
+        const doc = "= Intro <intro>\nSee @in\n= Later <later-section>"
+        const result = await complete(doc, doc.indexOf("@in") + 3)
+        ist(result.from, doc.indexOf("@in") + 1)
+        ist(option(result, "intro").type, "text")
+        ist(option(result, "intro").detail, "Document label")
+        ist(option(result, "later-section").type, "text")
+        ist(option(result, "<intro>"), undefined)
+    })
+
+    it("completes bare, qualified, and nested references", async () => {
+        const bareDoc = "See @\n#heading[Target] <chapter:one>"
+        const bare = await complete(bareDoc, bareDoc.indexOf("@") + 1)
+        ist(bare.from, bareDoc.indexOf("@") + 1)
+        ist(option(bare, "chapter:one").type, "text")
+
+        const nestedDoc = "#box[See @chapter.]\n<chapter.one>\n<chapter.two>"
+        const nested = await complete(nestedDoc, nestedDoc.indexOf("@chapter.") + 9)
+        ist(nested.from, nestedDoc.indexOf("@chapter.") + 1)
+        ist(option(nested, "chapter.one").type, "text")
+        ist(option(nested, "chapter.two").type, "text")
+    })
+
+    it("deduplicates labels and ignores non-label syntax", async () => {
+        const doc = "<real> <real>\n// <comment>\n`<raw>`\n#let text = \"<string>\"\n@re"
+        const result = await complete(doc)
+        ist(result.options.filter(completion => completion.label === "real").length, 1)
+        for (const label of ["comment", "raw", "string"]) {
+            ist(option(result, label), undefined)
+        }
+    })
+
+    it("does not complete references outside markup", async () => {
+        for (const doc of [
+            "<real>\n// @re",
+            "<real>\n`@re`",
+            "<real>\n$@re$",
+            "<real>\n#{ @re }",
+        ]) {
+            ist(await complete(doc, doc.indexOf("@re") + 3), null)
+        }
+        ist(await complete("No labels: @"), null)
+    })
+
     it("does not complete markup, comments, raw text, or field accesses", async () => {
         ist(await complete("plain", 5, true), null)
         ist(await complete("// #hea"), null)
