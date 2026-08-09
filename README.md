@@ -33,6 +33,28 @@ const extensions = [typst_lezer()]
 The standalone parser is also exported from the `/lezer` entry as
 `typstParser` and as the conventional `parser` alias.
 
+Fenced raw blocks can use another CodeMirror language without this package
+depending on any language packages. Supply either a resolver or an array of
+CodeMirror `LanguageDescription` objects:
+
+```js
+import {javascriptLanguage} from "@codemirror/lang-javascript"
+import {typst_lezer} from "codemirror-lang-typst/lezer"
+
+const typst = typst_lezer({
+  codeLanguages: name =>
+    name === "js" || name === "javascript" ? javascriptLanguage : null,
+})
+```
+
+The parser selected above is mounted inside raw blocks such as
+`` ```js ... ``` ``. Applications with a language registry can pass it
+directly—for example, `typst_lezer({codeLanguages: languages})` with the
+`languages` export from `@codemirror/language-data`. Use
+`defaultCodeLanguage` to parse untagged or unmatched fenced blocks. Passing a
+`LanguageSupport` there also installs that language's supporting extensions.
+Language-specific packages and registries remain application dependencies.
+
 `typst_lezer()` also registers CodeMirror autocomplete data for Typst 0.15's
 built-in functions, types, modules, constants, and math symbols. Add
 CodeMirror's `autocompletion()` extension to your editor to display them:

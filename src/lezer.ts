@@ -1,11 +1,20 @@
 import {
     Language,
+    LanguageDescription,
     LanguageSupport,
+    ParseContext,
     defaultHighlightStyle,
     defineLanguageFacet,
     languageDataProp,
     syntaxHighlighting,
 } from "@codemirror/language"
+import {
+    type Input,
+    type PartialParse,
+    type TreeFragment,
+    Parser,
+    parseMixed,
+} from "@lezer/common"
 import {styleTags, tags} from "@lezer/highlight"
 import {TypstHighlightSytle, typstLanguageDataConfig} from "./config"
 import {typstCompletionSource} from "./complete"
@@ -62,6 +71,77 @@ export const typstLezerHighlighting = styleTags({
     "Star Plus Minus Slash Eq EqEq ExclEq Lt LtEq Gt GtEq PlusEq HyphEq StarEq SlashEq Dots Arrow": tags.operator,
 })
 
+/** A language that may be selected for a fenced raw block. */
+export type TypstCodeLanguage = Language | LanguageDescription
+
+/** Resolve a Typst raw language tag, such as `js`, to a CodeMirror language. */
+export type TypstCodeLanguageResolver = (name: string) => TypstCodeLanguage | null
+
+/** Configuration for the native Lezer Typst language support. */
+export interface TypstLezerConfig {
+    /**
+     * Languages available to fenced raw blocks. Arrays are matched against
+     * the raw language tag with `LanguageDescription.matchLanguageName`.
+     */
+    codeLanguages?: readonly LanguageDescription[] | TypstCodeLanguageResolver,
+    /**
+     * Language used when a fenced raw block has no matching language tag.
+     * When a `LanguageSupport` is given, its support extensions are included.
+     */
+    defaultCodeLanguage?: Language | LanguageSupport,
+}
+
+type CodeParser = (name: string) => Parser | null
+
+function codeParser(
+    languages: TypstLezerConfig["codeLanguages"],
+    defaultLanguage: Language | null,
+): CodeParser {
+    return name => {
+        let found: TypstCodeLanguage | null = null
+        if (name && languages) {
+            found = typeof languages === "function"
+                ? languages(name)
+                : LanguageDescription.matchLanguageName(languages, name, true)
+        }
+        if (found instanceof LanguageDescription) {
+            return found.support
+                ? found.support.language.parser
+                : ParseContext.getSkippingParser(found.load())
+        }
+        return found ? found.parser : defaultLanguage?.parser ?? null
+    }
+}
+
+class MixedTypstParser extends Parser {
+    private readonly wrap
+
+    constructor(readonly base: Parser, resolveCode: CodeParser) {
+        super()
+        this.wrap = parseMixed((node, input) => {
+            if (node.name !== "Raw") return null
+            const raw = node.node
+            const opening = raw.firstChild
+            if (!opening || opening.name !== "RawDelim" || opening.to - opening.from < 3) return null
+            const language = raw.getChild("RawLang")
+            const parser = resolveCode(language ? input.read(language.from, language.to) : "")
+            if (!parser) return null
+            const closing = raw.lastChild
+            const from = language?.to ?? opening.to
+            const to = closing?.name === "RawDelim" ? closing.from : raw.to
+            return {parser, overlay: from < to ? [{from, to}] : []}
+        })
+    }
+
+    createParse(
+        input: Input,
+        fragments: readonly TreeFragment[],
+        ranges: readonly {from: number, to: number}[],
+    ): PartialParse {
+        return this.wrap(this.base.createParse(input, fragments, ranges), input, fragments, ranges)
+    }
+}
+
 /**
  * Typst language support backed entirely by the native Lezer parser.
  * Includes syntax highlighting, autocomplete, indentation, folding, and linting.
@@ -69,21 +149,31 @@ export const typstLezerHighlighting = styleTags({
  * Import this from `codemirror-lang-typst/lezer` when the application should
  * not load or bundle the Typst WASM parser.
  */
-export function typst_lezer(): LanguageSupport {
-    const parser = new TypstLezerParser(
+export function typst_lezer(config: TypstLezerConfig = {}): LanguageSupport {
+    const baseParser = new TypstLezerParser(
         languageDataProp.add(type => type.isTop ? typstLezerLanguageData : undefined),
         typstLezerHighlighting,
         typstLezerIndentation,
         typstLezerFolding,
     )
-    return new LanguageSupport(new Language(typstLezerLanguageData, parser, [], "typst"), [
+    const defaultLanguage = config.defaultCodeLanguage instanceof LanguageSupport
+        ? config.defaultCodeLanguage.language
+        : config.defaultCodeLanguage ?? null
+    const parser = config.codeLanguages || defaultLanguage
+        ? new MixedTypstParser(baseParser, codeParser(config.codeLanguages, defaultLanguage))
+        : baseParser
+    const support = [
         syntaxHighlighting(TypstHighlightSytle),
         syntaxHighlighting(defaultHighlightStyle),
         typstLezerIndentService,
         typstLezerListKeymap,
         typstLezerFoldService,
         typstLezerLinter,
-    ])
+    ]
+    if (config.defaultCodeLanguage instanceof LanguageSupport) {
+        support.push(config.defaultCodeLanguage.support)
+    }
+    return new LanguageSupport(new Language(typstLezerLanguageData, parser, [], "typst"), support)
 }
 
 export {typstLezerLanguageData as typstLanguageData}

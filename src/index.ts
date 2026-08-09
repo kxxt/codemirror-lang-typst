@@ -21,3 +21,8 @@ export {
     typstMathCompletions,
     typstSymbolCompletions,
 } from "./lezer"
+export type {
+    TypstCodeLanguage,
+    TypstCodeLanguageResolver,
+    TypstLezerConfig,
+} from "./lezer"

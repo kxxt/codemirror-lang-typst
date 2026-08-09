@@ -9,6 +9,8 @@ All notable changes to this project are documented in this file.
 - Added document-label autocomplete for Typst references after `@`.
 - Added syntax linter to `typst_lezer()` through CodeMirror's
   lint integration.
+- Added configurable mixed-language parsing and highlighting inside fenced raw
+  blocks through `codeLanguages` and `defaultCodeLanguage`.
 
 ## [0.5.0] - 2026-08-08
 
